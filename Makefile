@@ -21,9 +21,12 @@
 
 PLUGINNAME = xytools
 
+# for building dist zip
+TEMPDIR = /tmp
+
 PY_FILES = xytools.py xytoolsdialog.py __init__.py
 
-EXTRAS = icon.png help.png
+EXTRAS = icon.png help.png docs/*
 
 UI_FILES = ui_xytools.py
 
@@ -47,5 +50,16 @@ deploy: compile
 	cp -vf $(PY_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
 	cp -vf $(UI_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
 	cp -vf $(RESOURCE_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
-	cp -vf $(EXTRAS) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
+	cp -vrf $(EXTRAS) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
+	mkdir -p $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/docs
 
+
+dist: cleandist
+	mkdir -p $(TEMPDIR)/$(PLUGINNAME)
+	cp -r ./*.* $(TEMPDIR)/$(PLUGINNAME)
+	cd $(TEMPDIR); zip -9rv $(PLUGINNAME).zip $(PLUGINNAME)
+	@echo "You can find the plugin for the qgis repo here: $(TEMPDIR)/$(PLUGINNAME).zip"
+
+cleandist:
+	rm -rf $(TEMPDIR)/$(PLUGINNAME)
+	rm -rf $(PLUGINNAME).zip
