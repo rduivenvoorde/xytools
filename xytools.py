@@ -164,6 +164,7 @@ class XyTools:
         editMenu.removeAction(self.action)
         editMenu.update()
 
+        self.cleanupXyMarkers();
         self.layerInfo = {}
         self.layer = None
 
@@ -176,6 +177,7 @@ class XyTools:
 
 
     def toggleEditing(self):
+        self.layer = self.iface.activeLayer()
         if not self.iface.actionToggleEditing().isChecked():
             # disable stuff (for this layer)
             self.action.setChecked(False)
@@ -183,19 +185,23 @@ class XyTools:
             self.canvas.unsetMapTool(self.xytool)
             # edit tools itself will ask for a potential save of edits
             return
-        self.layer = self.iface.activeLayer()
         if not self.layer == None and self.layer.type() == 0: # only vector layers
             self.action.setEnabled(True)
 
 
     def currentLayerChanged(self, currentLayer):
         if currentLayer == None: return
+        self.cleanupXyMarkers()
         self.layer = self.iface.activeLayer()
         if currentLayer.isEditable():
             self.action.setEnabled(True)
         else:
             self.action.setEnabled(False)
             self.action.setChecked(False)
+
+    def cleanupXyMarkers(self):
+        for lyr in self.layerInfo:
+            self.layerInfo[lyr].deleteMarker()
 
     def help(self):
         file = inspect.getsourcefile(XyTools)
@@ -263,7 +269,7 @@ class XyTable():
     def selectionChanged(self):
         # do this because apparently there are two events, first one with NO selection returned
         ids = self.layer.selectedFeaturesIds()
-        if len(ids)==0:
+        if len(ids)==0 or not self.layer.isEditable():
             return
         fid = self.checkGetSelectedFeatureId()
         if fid==None or self.xIdx == None or self.yIdx == None:
@@ -274,12 +280,22 @@ class XyTable():
         y = f.attributeMap()[self.yIdx]
         x = f.attributeMap()[self.xIdx]
         if x.canConvert(QVariant.Double) and y.canConvert(QVariant.Double): # not NULL
-            self.setMarker(x.toDouble()[0], y.toDouble()[0])
+            xd = x.toDouble()[0]
+            yd = y.toDouble()[0]
+            xy = QgsPoint(xd,yd)
+            self.setMarker(xd, yd)
+            if not self.canvas.extent().contains(xy) and (xd>0 and yd>0):
+                width = self.canvas.extent().width()
+                height = self.canvas.extent().height()
+                self.canvas.setExtent(QgsRectangle(xd-width/2,yd-height/2,xd+width/2,yd+height/2))
+                self.canvas.refresh()
 
     def setMarker(self, x,y):
         self.deleteMarker()
         if x != 0 and y != 0 and x != None and y != None:
             self.marker = QgsVertexMarker(self.canvas)
+            # make marker better visible:
+            self.marker.setPenWidth(5)
             self.marker.setCenter(QgsPoint(x, y))
 
     def editingStopped(self):

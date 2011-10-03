@@ -24,7 +24,7 @@ def name():
 def description():
     return "Tools for managing tabular data with x y columns"
 def version():
-    return "Version 0.1"
+    return "Version 0.1.1"
 def icon():
     return "icon.png"
 def qgisMinimumVersion():
