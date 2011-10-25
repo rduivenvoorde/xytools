@@ -120,9 +120,8 @@ class XyTools:
         #   with  ALL attributes, WITHIN extent, WITHOUT geom, AND NOT using Intersect instead of bbox
         prov.select(prov.attributeIndexes(), prov.extent(), False, False)
         while prov.nextFeature(feature):
-            # TODO: to float instead of toInt
-            x=feature.attributeMap()[self.layerInfo[self.layer].xIdx].toInt()
-            y=feature.attributeMap()[self.layerInfo[self.layer].yIdx].toInt()
+            x=feature.attributeMap()[self.layerInfo[self.layer].xIdx].toFloat()
+            y=feature.attributeMap()[self.layerInfo[self.layer].yIdx].toFloat()
             feature.setGeometry(QgsGeometry.fromPoint(QgsPoint(x[0],y[0])))
             writer.addFeature(feature)
         # flush and delete
@@ -212,7 +211,7 @@ class XyTools:
     def about(self):
         infoString = QString("Written by Richard Duivenvoorde\nEmail - richard@duif.net\n")
         infoString = infoString.append("Company - http://www.webmapper.net\n")
-        infoString = infoString.append("Source: TODO")
+        infoString = infoString.append("Source: http://hub.qgis.org/projects/xytools/")
         QMessageBox.information(self.iface.mainWindow(), \
                             "XY tools Plugin About", infoString)
 

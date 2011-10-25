@@ -46,14 +46,19 @@ Geometries of the shape file will be using the x- and y- columns for there coord
 .. image:: img/save.png
 
 
-Notes
------
+Notes and versions
+------------------
 
 Currently the plugin is working both with shape files and single dbf-files. Saving cvs files is not supported by
 the underlying OGR-library.
 
 So: for a dbf you can add and remove records. But if you want further editing: like inserting records, adding columns etc,
 either use Libre/Open-office, or one of the other qgis table plugins.
+
+- 0.1.2 coordinates as floats instead of ints, Makefile and dist changes
+
+- 0.1.1 first public version in git
+
 
 
 Ideas/todo
