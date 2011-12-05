@@ -43,6 +43,7 @@ class XyTools:
         self.layerInfo = {}
         self.layer = None
 
+
     def initGui(self):
         # we add the action to the same action group as another digitize action
         # in combination with the setCheckable it makes it will be unchecked automagically
@@ -51,10 +52,6 @@ class XyTools:
         self.action.setCheckable(True)
         # connect the action to the run method
         QObject.connect(self.action, SIGNAL("triggered(bool)"), self.xyToolClick)
-
-        # Add toolbar button and menu item
-        #self.iface.addToolBarIcon(self.action)
-        #self.iface.addPluginToMenu("&XY tools", self.action)
 
         # about
         self.aboutAction = QAction(QIcon(":/plugins/xytools/help.png"), \
@@ -74,6 +71,12 @@ class XyTools:
         self.shapeSaveAction.setWhatsThis("Xy Tools Plugin Save as Shape file")
         self.iface.addPluginToMenu("&XY tools", self.shapeSaveAction)
         QObject.connect(self.shapeSaveAction, SIGNAL("activated()"), self.shapeSave)
+        # save as excel
+        self.excelSaveAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
+                              "Save table as Excel file", self.iface.mainWindow())
+        self.excelSaveAction.setWhatsThis("Xy Tools Plugin Save Attributes as Excel file")
+        self.iface.addPluginToMenu("&XY tools", self.excelSaveAction)
+        QObject.connect(self.excelSaveAction, SIGNAL("activated()"), self.excelSave)
 
         # add xypick button to edit/digitize toolbar
         editMenu = self.iface.digitizeToolBar()
@@ -100,6 +103,40 @@ class XyTools:
         if self.layerInfo.has_key(self.layer) or self.getXyColumns(self.layer):
             self.writeToShape()
 
+
+    def excelSave(self):
+        filename = QFileDialog.getSaveFileName(self.iface.mainWindow(),
+                    "Please save excel file as...",
+                    ".",
+                    "Excel files (*.xls)",
+                    "Filter list for selecting files from a dialog box")
+        fn, fileExtension = path.splitext(unicode(filename))
+        if len(fn) == 0: # user choose cancel
+            return
+        if fileExtension != 'xls':
+            filename = filename + '.xls'
+        self.layer = self.iface.activeLayer()
+        # lazy loading ??
+        from providers import excel
+        xlw = excel.Writer(filename)
+        prov = self.layer.dataProvider()
+        prov.select(prov.attributeIndexes())
+        feature = QgsFeature();
+        rowNr = 0
+        while prov.nextFeature(feature):
+            if rowNr == 0:
+                values = []
+                for (i, field) in prov.fields().iteritems():
+                    values.append(field.name().trimmed())
+                print values
+            else:
+                values = feature.attributeMap().values()
+            xlw.writeAttributeRow( rowNr, values )
+            rowNr = rowNr+1
+        xlw.saveFile()
+        QMessageBox.information(self.iface.mainWindow(), "Success", "Successfully saved as xls file")
+
+
     def writeToShape(self):
         filename = QFileDialog.getSaveFileName(self.iface.mainWindow(),
                     "Please save shape file as...",
@@ -107,12 +144,8 @@ class XyTools:
                     "Esri shape files (*.shp)",
                     "Filter list for selecting files from a dialog box")
         # Check that a file was selected
-        if filename.size() == 0:
-            QMessageBox.warning(self.iface.mainWindow(), "Not saved!", "Shape file not saved because no file name was given")
+        if len(fn) == 0: # user choose cancel
             return
-        self.writeToFile(filename)
-
-    def writeToFile(self, filename):
         fields = self.layer.dataProvider().fields()
         writer = QgsVectorFileWriter(filename, "UTF8", fields, QGis.WKBPoint, None)
         feature = QgsFeature();
@@ -156,6 +189,7 @@ class XyTools:
         self.iface.removePluginMenu("&XY tools",self.helpAction)
         self.iface.removePluginMenu("&XY tools",self.aboutAction)
         self.iface.removePluginMenu("&XY tools",self.shapeSaveAction)
+        self.iface.removePluginMenu("&XY tools",self.excelSaveAction)
         self.iface.removeToolBarIcon(self.action)
 
         # remove xypick button to edit/digitize toolbar

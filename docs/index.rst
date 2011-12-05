@@ -49,7 +49,7 @@ Geometries of the shape file will be using the x- and y- columns for there coord
 Notes and versions
 ------------------
 
-Currently the plugin is working both with shape files and single dbf-files. Saving cvs files is not supported by
+Currently the plugin is working both with shape files and single dbf-files. Saving csv files is not supported by
 the underlying OGR-library.
 
 So: for a dbf you can add and remove records. But if you want further editing: like inserting records, adding columns etc,

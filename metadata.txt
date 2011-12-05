@@ -1,0 +1,20 @@
+; the next section is mandatory
+[general]
+name:XyTools
+qgisMinimumVersion:1.6
+description:Tools for managing tabular data with x y columns
+version:0.2
+; end of mandatory metadata
+
+
+; start of optional metadata
+
+changelog:
+    0.2 addition of simple export to Excel
+
+homepage:http://hub.qgis.org/projects/xytools
+repository:http://hub.qgis.org/projects/xytools/repository
+tracker:http://hub.qgis.org/projects/xytools/issues
+icon:icon.png
+
+
