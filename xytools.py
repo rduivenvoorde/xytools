@@ -120,19 +120,31 @@ class XyTools:
         from providers import excel
         xlw = excel.Writer(filename)
         prov = self.layer.dataProvider()
+        selection = None
+        if self.layer.selectedFeatureCount() > 0:
+            if QMessageBox.question(self.iface.mainWindow(), 
+                self.MSG_BOX_TITLE, 
+                ("You have a selection in this layer. Only export this selection?\n" "Click Yes to export selection only, click No to export all rows."), 
+                QMessageBox.No, QMessageBox.Yes) == QMessageBox.Yes:
+                    selection = self.layer.selectedFeaturesIds()
         prov.select(prov.attributeIndexes())
         feature = QgsFeature();
         rowNr = 0
         while prov.nextFeature(feature):
+            # attribute names
             if rowNr == 0:
                 values = []
                 for (i, field) in prov.fields().iteritems():
                     values.append(field.name().trimmed())
-                print values
-            else:
+                xlw.writeAttributeRow( rowNr, values )
+                rowNr+=1
+            # and attribute values, either for all or only for selection
+            if selection == None or feature.id() in selection:
                 values = feature.attributeMap().values()
-            xlw.writeAttributeRow( rowNr, values )
-            rowNr = rowNr+1
+                print 2
+                print values
+                xlw.writeAttributeRow( rowNr, values )
+                rowNr+=1
         xlw.saveFile()
         QMessageBox.information(self.iface.mainWindow(), "Success", "Successfully saved as xls file")
 
