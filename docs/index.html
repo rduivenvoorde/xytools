@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
-<title>XY Tools plugin</title>
+<title>XY Tools plugin (version 0.2)</title>
 <style type="text/css">
 
 /*
@@ -310,14 +310,15 @@ ul.auto-toc {
 </style>
 </head>
 <body>
-<div class="document" id="xy-tools-plugin">
-<h1 class="title">XY Tools plugin</h1>
+<div class="document" id="xy-tools-plugin-version-0-2">
+<h1 class="title">XY Tools plugin (version 0.2)</h1>
 
 <div class="section" id="aim">
 <h1>Aim</h1>
 <p>The aim of the xy-tools-plugin is to fill an x- and y-column
 of a given attribute table by clicking on a (reference) map.</p>
 <p>After 'filling the x and y column' you are able to export the table to a point shape file.</p>
+<p>It is also possible to save it as an Excel file (python xlwt library needed)</p>
 <p>It started off as a plugin for a user who had an excell file with
 toponiemen / fieldnames and a stack of old scanned cadastral maps.</p>
 </div>
@@ -339,6 +340,7 @@ save your edits, or discard them.</p>
 <p>In the menu of xy tools there is the possibility to save a attribute table as a point shape file (img below).</p>
 <p>Geometries of the shape file will be using the x- and y- columns for there coordinates.</p>
 <img alt="img/save.png" src="img/save.png" />
+<p>In the same menu there is since version 0.2 also the possibilty to save the attribute table as an (nog geo) Excel file</p>
 </div>
 <div class="section" id="notes-and-versions">
 <h1>Notes and versions</h1>
@@ -347,6 +349,7 @@ the underlying OGR-library.</p>
 <p>So: for a dbf you can add and remove records. But if you want further editing: like inserting records, adding columns etc,
 either use Libre/Open-office, or one of the other qgis table plugins.</p>
 <ul class="simple">
+<li>0.2.0 ability to save current attributetable as an Excel file (python xlwt lib needed)</li>
 <li>0.1.2 coordinates as floats instead of ints, Makefile and dist changes</li>
 <li>0.1.1 first public version in git</li>
 </ul>
@@ -354,6 +357,7 @@ either use Libre/Open-office, or one of the other qgis table plugins.</p>
 <div class="section" id="ideas-todo">
 <h1>Ideas/todo</h1>
 <ul class="simple">
+<li>after clicking an xy, move selected record in attribute table to next row (and stop doing this if the click is a right click)</li>
 <li>instead of saving as shape: make it a memory layer, giving it the possibility to use the generic 'save as'-whatever dialog.</li>
 <li>reproject / change srs of a table containing x and y colum</li>
 <li>selecting a record of a single dbf raises errors in command box</li>

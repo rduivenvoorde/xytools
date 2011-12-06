@@ -1,5 +1,5 @@
-XY Tools plugin
-===============
+XY Tools plugin (version 0.2)
+=============================
 
 Aim
 ---
@@ -8,6 +8,8 @@ The aim of the xy-tools-plugin is to fill an x- and y-column
 of a given attribute table by clicking on a (reference) map.
 
 After 'filling the x and y column' you are able to export the table to a point shape file.
+
+It is also possible to save it as an Excel file (python xlwt library needed)
 
 It started off as a plugin for a user who had an excell file with
 toponiemen / fieldnames and a stack of old scanned cadastral maps.
@@ -45,6 +47,8 @@ Geometries of the shape file will be using the x- and y- columns for there coord
 
 .. image:: img/save.png
 
+In the same menu there is since version 0.2 also the possibilty to save the attribute table as an (nog geo) Excel file
+
 
 Notes and versions
 ------------------
@@ -55,6 +59,8 @@ the underlying OGR-library.
 So: for a dbf you can add and remove records. But if you want further editing: like inserting records, adding columns etc,
 either use Libre/Open-office, or one of the other qgis table plugins.
 
+- 0.2.0 ability to save current attributetable as an Excel file (python xlwt lib needed)
+
 - 0.1.2 coordinates as floats instead of ints, Makefile and dist changes
 
 - 0.1.1 first public version in git
@@ -63,6 +69,9 @@ either use Libre/Open-office, or one of the other qgis table plugins.
 
 Ideas/todo
 ----------
+
+- after clicking an xy, move selected record in attribute table to next row (and stop doing this if the click is a right click)
+
 - instead of saving as shape: make it a memory layer, giving it the possibility to use the generic 'save as'-whatever dialog.
 
 - reproject / change srs of a table containing x and y colum

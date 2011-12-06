@@ -98,13 +98,18 @@ class XyTools:
             else:
                 self.action.setChecked(False)
 
-
     def shapeSave(self):
+        if self.layer == None:
+            QMessageBox.warning(self.iface.mainWindow(), "No active layer", "Please make an vector layer active before saving it to shape file.")
+            return
         if self.layerInfo.has_key(self.layer) or self.getXyColumns(self.layer):
             self.writeToShape()
 
 
     def excelSave(self):
+        if self.layer == None: 
+            QMessageBox.warning(self.iface.mainWindow(), "No active layer", "Please make an vector layer active before saving it to excel file.")
+            return
         filename = QFileDialog.getSaveFileName(self.iface.mainWindow(),
                     "Please save excel file as...",
                     ".",
@@ -159,7 +164,7 @@ class XyTools:
         if len(fn) == 0: # user choose cancel
             return
         fields = self.layer.dataProvider().fields()
-        writer = QgsVectorFileWriter(filename, "UTF8", fields, QGis.WKBPoint, None)
+        writer = QgsVectorFileWriter(unicode(filename), "UTF8", fields, QGis.WKBPoint, None)
         feature = QgsFeature();
         prov = self.layer.dataProvider()
         #   with  ALL attributes, WITHIN extent, WITHOUT geom, AND NOT using Intersect instead of bbox

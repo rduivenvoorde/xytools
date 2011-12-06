@@ -37,6 +37,7 @@ RESOURCE_FILES = resources.py
 default: compile
 
 compile: $(UI_FILES) $(RESOURCE_FILES)
+	rst2html.py docs/index.rst > docs/index.html
 
 %.py : %.rc
 	pyrcc4 -o $@  $<
@@ -54,13 +55,14 @@ deploy: compile
 	cp -vf $(RESOURCE_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
 	cp -vrf $(EXTRAS) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
 	mkdir -p $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/docs
-	cp -vrf $(DOCS) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/docs
+	cp -vrf $(DOCS) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/docs/
+
 
 
 dist: cleandist deploy
 	mkdir -p $(TEMPDIR)/$(PLUGINNAME)
 	cp -r * $(TEMPDIR)/$(PLUGINNAME)
-	cd $(TEMPDIR); zip -9rv $(PLUGINNAME).zip $(PLUGINNAME)
+	cd $(TEMPDIR); zip -9rv $(PLUGINNAME).zip $(PLUGINNAME) -i *.py *.html *.png *.txt
 	@echo "You can find the plugin for the qgis repo here: $(TEMPDIR)/$(PLUGINNAME).zip"
 
 cleandist:
