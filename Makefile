@@ -50,7 +50,9 @@ compile: $(UI_FILES) $(RESOURCE_FILES)
 # $HOME/.qgis/python/plugins
 deploy: compile
 	mkdir -p $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
-	cp -vf $(PY_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
+	cp -vrf $(PY_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
+	mkdir -p $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/providers
+	cp -vrf providers/*.py $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/providers
 	cp -vf $(UI_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
 	cp -vf $(RESOURCE_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
 	cp -vrf $(EXTRAS) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
@@ -67,4 +69,4 @@ dist: cleandist deploy
 
 cleandist:
 	rm -rf $(TEMPDIR)/$(PLUGINNAME)
-	rm -rf $(PLUGINNAME).zip
+	rm -rf $(TEMPDIR)/$(PLUGINNAME).zip

@@ -21,6 +21,7 @@
 # Import the PyQt and QGIS libraries
 import inspect
 from os import path
+import types
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
@@ -67,16 +68,22 @@ class XyTools:
         QObject.connect(self.helpAction, SIGNAL("activated()"), self.help)
         # save as shape
         self.shapeSaveAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
-                              "Save table as Point shape file", self.iface.mainWindow())
-        self.shapeSaveAction.setWhatsThis("Xy Tools Plugin Save as Shape file")
+                              "Save attribute table as Point shape file", self.iface.mainWindow())
+        self.shapeSaveAction.setWhatsThis("Xy Tools Plugin Save attribute table as Shape file (using xy-Column values for geometries!)")
         self.iface.addPluginToMenu("&XY tools", self.shapeSaveAction)
         QObject.connect(self.shapeSaveAction, SIGNAL("activated()"), self.shapeSave)
         # save as excel
         self.excelSaveAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
-                              "Save table as Excel file", self.iface.mainWindow())
-        self.excelSaveAction.setWhatsThis("Xy Tools Plugin Save Attributes as Excel file")
+                              "Save attribute table as Excel file", self.iface.mainWindow())
+        self.excelSaveAction.setWhatsThis("Xy Tools Plugin Save Attribute Table as Excel File")
         self.iface.addPluginToMenu("&XY tools", self.excelSaveAction)
         QObject.connect(self.excelSaveAction, SIGNAL("activated()"), self.excelSave)
+        # open excel file
+        self.excelOpenAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
+                              "Open Excel file as attribute table or Point layer", self.iface.mainWindow())
+        self.excelOpenAction.setWhatsThis("Xy Tools Plugin Open Excel file as Attribute table or Point layer")
+        self.iface.addPluginToMenu("&XY tools", self.excelOpenAction)
+        QObject.connect(self.excelOpenAction, SIGNAL("activated()"), self.excelOpen)
 
         # add xypick button to edit/digitize toolbar
         editMenu = self.iface.digitizeToolBar()
@@ -105,6 +112,62 @@ class XyTools:
         if self.layerInfo.has_key(self.layer) or self.getXyColumns(self.layer):
             self.writeToShape()
 
+
+    def excelOpen(self):
+        filename = QFileDialog.getOpenFileName(self.iface.mainWindow(),
+                    "Please choose an excel file to open...",
+                    ".",
+                    "Excel files (*.xls)",
+                    "Filter list for selecting files from a dialog box")
+        if len(filename)==0:
+            return
+        from providers import excel
+        xlr = excel.Reader(filename)
+        try:
+            rows = xlr.openFile()
+        except:
+            QMessageBox.warning(self.iface.mainWindow(), "Unable to open file", "Unable to open file: " + unicode(filename))
+            return
+        layer = self.createMemoryLayer()
+        if len(rows) == 0:
+            QMessageBox.warning(self.iface.mainWindow(), "No rows found", "Please choose a excel file with more then one row filled.")
+            return
+        attrCount = len(rows[0])
+        for col in rows[0]:
+            layer.dataProvider().addAttributes([QgsField(unicode(col), QVariant.String)])
+        # see: http://osgeo-org.1803224.n2.nabble.com/Add-attributes-to-memory-provider-with-python-td6073149.html
+        layer.updateFieldMap()
+        xyOk = False
+        if self.getXyColumns(layer):
+            xyOk = True
+        # fill rows
+        for row in rows:
+            if not row == rows[0]:
+                f = QgsFeature()
+                if xyOk:
+                    x=row[self.layerInfo[self.layer].xIdx]
+                    y=row[self.layerInfo[self.layer].yIdx]
+                    if type(x) in types.StringTypes or type(y) in types.StringTypes:
+                        # mmm, we have strings as values... try to cast to float
+                        try:
+                            x = float(x)
+                            y = float(y)
+                        except:
+                            QMessageBox.warning(self.iface.mainWindow(), "Non numeric value found", "This excel file contained non numeric values in one of the x or y columns you choose: '" + unicode(x) + "' or '" + unicode(y) + "'.\nYou can open it without x and y columns by NOT choosing x and y columns (click Cancel in that dialog).\nRemoving the layer...")
+                            QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+                            return
+                    f.setGeometry(QgsGeometry.fromPoint( QgsPoint(x,y) ) )
+                else:
+                    f.setGeometry( QgsGeometry.fromWkt('POINT(0 0)') )
+                f.setAttributeMap( dict(zip( range(0,len(row)) ,row ))  )
+                layer.dataProvider().addFeatures([f])
+        layer.updateExtents()
+        layer.reload()
+        # trying to force a repaint
+        self.canvas.updateFullExtent()
+        self.canvas.setDirty(True)
+        self.canvas.refresh()
+        self.canvas.zoomByFactor(0.99)
 
     def excelSave(self):
         if self.layer == None: 
@@ -146,8 +209,6 @@ class XyTools:
             # and attribute values, either for all or only for selection
             if selection == None or feature.id() in selection:
                 values = feature.attributeMap().values()
-                print 2
-                print values
                 xlw.writeAttributeRow( rowNr, values )
                 rowNr+=1
         xlw.saveFile()
@@ -161,7 +222,7 @@ class XyTools:
                     "Esri shape files (*.shp)",
                     "Filter list for selecting files from a dialog box")
         # Check that a file was selected
-        if len(fn) == 0: # user choose cancel
+        if len(filename) == 0: # user choose cancel
             return
         fields = self.layer.dataProvider().fields()
         writer = QgsVectorFileWriter(unicode(filename), "UTF8", fields, QGis.WKBPoint, None)
@@ -207,6 +268,7 @@ class XyTools:
         self.iface.removePluginMenu("&XY tools",self.aboutAction)
         self.iface.removePluginMenu("&XY tools",self.shapeSaveAction)
         self.iface.removePluginMenu("&XY tools",self.excelSaveAction)
+        self.iface.removePluginMenu("&XY tools",self.excelOpenAction)
         self.iface.removeToolBarIcon(self.action)
 
         # remove xypick button to edit/digitize toolbar
@@ -222,6 +284,8 @@ class XyTools:
         QObject.disconnect(self.aboutAction, SIGNAL("activated()"), self.about)
         QObject.disconnect(self.helpAction, SIGNAL("activated()"), self.help)
         QObject.disconnect(self.shapeSaveAction, SIGNAL("activated()"), self.shapeSave)
+        QObject.disconnect(self.excelSaveAction, SIGNAL("activated()"), self.excelSave)
+        QObject.disconnect(self.excelOpenAction, SIGNAL("activated()"), self.excelOpen)
         QObject.disconnect(self.iface, SIGNAL("currentLayerChanged(QgsMapLayer *)"), self.currentLayerChanged)
         QObject.disconnect(self.iface.actionToggleEditing(), SIGNAL("changed()"), self.toggleEditing)
 
@@ -253,6 +317,16 @@ class XyTools:
         for lyr in self.layerInfo:
             self.layerInfo[lyr].deleteMarker()
 
+    def createMemoryLayer(self, crs=None):
+        layer = QgsVectorLayer("Point", "Temporary Layer (volatile)", "memory")
+        if crs:
+            crs = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.PostgisCrsId)
+        else:
+            crs = self.canvas.mapRenderer().destinationCrs()
+        layer.setCrs(crs)
+        QgsMapLayerRegistry.instance().addMapLayer(layer)
+        return layer
+
     def help(self):
         file = inspect.getsourcefile(XyTools)
         file = 'file://' + path.join(path.dirname(file),'docs/index.html')
@@ -265,7 +339,6 @@ class XyTools:
         infoString = infoString.append("Source: http://hub.qgis.org/projects/xytools/")
         QMessageBox.information(self.iface.mainWindow(), \
                             "XY tools Plugin About", infoString)
-
 
     def mapClick(self, xy):
         self.layerInfo[self.layer].setXY(xy.x(), xy.y())
@@ -299,8 +372,8 @@ class XyTable():
         fid = self.checkGetSelectedFeatureId()
         if fid==None:
             return
-        self.layer.changeAttributeValue(fid, self.xIdx, int(x))
-        self.layer.changeAttributeValue(fid, self.yIdx, int(y))
+        self.layer.changeAttributeValue(fid, self.xIdx, float(x))
+        self.layer.changeAttributeValue(fid, self.yIdx, float(y))
         self.setMarker(x,y)
         # windows does not repaint the attribute table
         self.layer.reload()
