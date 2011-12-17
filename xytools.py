@@ -216,7 +216,8 @@ class XyTools:
         fn, fileExtension = path.splitext(unicode(filename))
         if len(fn) == 0: # user choose cancel
             return
-        if fileExtension != 'xls':
+        print fileExtension
+        if fileExtension != '.xls':
             filename = filename + '.xls'
         try:
             from providers import excel
