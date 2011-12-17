@@ -2,15 +2,16 @@
 [general]
 name:XyTools
 qgisMinimumVersion:1.6
-description:Tools for managing tabular data with x y columns
-version:0.2
+description:Tools for managing tabular data with x y columns. It can open spreadsheet files (Libre/OpenOffice, Excel) as point layers and save attribute tables as Excel file
+version:0.3.0
 ; end of mandatory metadata
 
 
 ; start of optional metadata
 
 changelog:
-    0.2 addition of simple export to Excel
+    0.3.0   simple import of Libre/OpenOffice via python-uno
+    0.2.0     simple import/export to Excel
 
 homepage:http://hub.qgis.org/projects/xytools
 repository:http://hub.qgis.org/projects/xytools/repository

@@ -20,8 +20,8 @@
 """
 # Import the PyQt and QGIS libraries
 import inspect
-from os import path
 import types
+from os import path
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
@@ -84,6 +84,12 @@ class XyTools:
         self.excelOpenAction.setWhatsThis("Xy Tools Plugin Open Excel file as Attribute table or Point layer")
         self.iface.addPluginToMenu("&XY tools", self.excelOpenAction)
         QObject.connect(self.excelOpenAction, SIGNAL("activated()"), self.excelOpen)
+        # open open/libreoffice file
+        self.unoOpenAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
+                              "Open Libre/OpenOffice Calc file as attribute table or Point layer", self.iface.mainWindow())
+        self.unoOpenAction.setWhatsThis("Xy Tools Plugin Open Libre/OpenOffice Calc file as Attribute table or Point layer")
+        self.iface.addPluginToMenu("&XY tools", self.unoOpenAction)
+        QObject.connect(self.unoOpenAction, SIGNAL("activated()"), self.unoOpen)
 
         # add xypick button to edit/digitize toolbar
         editMenu = self.iface.digitizeToolBar()
@@ -105,6 +111,7 @@ class XyTools:
             else:
                 self.action.setChecked(False)
 
+
     def shapeSave(self):
         if self.layer == None:
             QMessageBox.warning(self.iface.mainWindow(), "No active layer", "Please make an vector layer active before saving it to shape file.")
@@ -115,22 +122,49 @@ class XyTools:
 
     def excelOpen(self):
         filename = QFileDialog.getOpenFileName(self.iface.mainWindow(),
-                    "Please choose an excel file to open...",
+                    "Please choose an Excel spreadsheet file to open...",
                     ".",
                     "Excel files (*.xls)",
                     "Filter list for selecting files from a dialog box")
         if len(filename)==0:
             return
-        from providers import excel
-        xlr = excel.Reader(filename)
         try:
-            rows = xlr.openFile()
+            from providers import excel
+        except:
+            QMessageBox.warning(self.iface.mainWindow(), "Unable to load Python module", "There is a problem with loading a python module which is needed to read/write Excel files. Please see documentation/help how to install python xlw and xlrd libraries.")
+            return
+        provider = excel.Reader(filename)
+        # now load in layer
+        self.loadSheetAsLayer(provider)
+
+
+    def unoOpen(self):
+        filename = QFileDialog.getOpenFileName(self.iface.mainWindow(),
+                    "Please choose an Libre/OpenOffice spreadsheet file to open...",
+                    ".",
+                    "Libre/OpenOffice OOcalc files (*.ods)",
+                    "Filter list for selecting files from a dialog box")
+        if len(filename)==0:
+            return
+        try:
+            from providers import libreoffice
+        except:
+            QMessageBox.warning(self.iface.mainWindow(), "Unable to load Python module", "There is a problem with loading a python module which is needed to read/write Libre/OpenOffice spreadsheet files. Please see documentation/help how to install these python-uno libraries.")
+            return
+        provider = libreoffice.Reader(filename)
+        # now load in layer
+        self.loadSheetAsLayer(provider)
+
+
+    def loadSheetAsLayer(self, provider):
+        try:
+            rows = provider.openFile()
         except:
             QMessageBox.warning(self.iface.mainWindow(), "Unable to open file", "Unable to open file: " + unicode(filename))
             return
         layer = self.createMemoryLayer()
         if len(rows) == 0:
-            QMessageBox.warning(self.iface.mainWindow(), "No rows found", "Please choose a excel file with more then one row filled.")
+            QMessageBox.warning(self.iface.mainWindow(), "No rows found", "Please choose a spreadsheet with more then one row filled.")
             return
         attrCount = len(rows[0])
         for col in rows[0]:
@@ -153,7 +187,7 @@ class XyTools:
                             x = float(x)
                             y = float(y)
                         except:
-                            QMessageBox.warning(self.iface.mainWindow(), "Non numeric value found", "This excel file contained non numeric values in one of the x or y columns you choose: '" + unicode(x) + "' or '" + unicode(y) + "'.\nYou can open it without x and y columns by NOT choosing x and y columns (click Cancel in that dialog).\nRemoving the layer...")
+                            QMessageBox.warning(self.iface.mainWindow(), "Non numeric value found", "This spreadsheet contained non numeric values in one of the x or y columns. Values found: '" + unicode(x) + "' and '" + unicode(y) + "'.\nYou can open it without x and y columns by NOT choosing x and y columns (click Cancel in that dialog).\nRemoving the layer...")
                             QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
                             return
                     f.setGeometry(QgsGeometry.fromPoint( QgsPoint(x,y) ) )
@@ -169,6 +203,7 @@ class XyTools:
         self.canvas.refresh()
         self.canvas.zoomByFactor(0.99)
 
+
     def excelSave(self):
         if self.layer == None: 
             QMessageBox.warning(self.iface.mainWindow(), "No active layer", "Please make an vector layer active before saving it to excel file.")
@@ -183,10 +218,13 @@ class XyTools:
             return
         if fileExtension != 'xls':
             filename = filename + '.xls'
-        self.layer = self.iface.activeLayer()
-        # lazy loading ??
-        from providers import excel
+        try:
+            from providers import excel
+        except:
+            QMessageBox.warning(self.iface.mainWindow(), "Unable to load Python module", "There is a problem with loading a python module which is needed to read/write Excel files. Please see documentation/help how to install python xlw and xlrd libraries.")
+            return
         xlw = excel.Writer(filename)
+        self.layer = self.iface.activeLayer()
         prov = self.layer.dataProvider()
         selection = None
         if self.layer.selectedFeatureCount() > 0:
@@ -269,6 +307,7 @@ class XyTools:
         self.iface.removePluginMenu("&XY tools",self.shapeSaveAction)
         self.iface.removePluginMenu("&XY tools",self.excelSaveAction)
         self.iface.removePluginMenu("&XY tools",self.excelOpenAction)
+        self.iface.removePluginMenu("&XY tools",self.unoOpenAction)
         self.iface.removeToolBarIcon(self.action)
 
         # remove xypick button to edit/digitize toolbar
@@ -286,6 +325,7 @@ class XyTools:
         QObject.disconnect(self.shapeSaveAction, SIGNAL("activated()"), self.shapeSave)
         QObject.disconnect(self.excelSaveAction, SIGNAL("activated()"), self.excelSave)
         QObject.disconnect(self.excelOpenAction, SIGNAL("activated()"), self.excelOpen)
+        QObject.disconnect(self.unoOpenAction, SIGNAL("activated()"), self.unoOpen)
         QObject.disconnect(self.iface, SIGNAL("currentLayerChanged(QgsMapLayer *)"), self.currentLayerChanged)
         QObject.disconnect(self.iface.actionToggleEditing(), SIGNAL("changed()"), self.toggleEditing)
 

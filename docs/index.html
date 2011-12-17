@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
-<title>XY Tools plugin (version 0.2)</title>
+<title>XY Tools plugin (version 0.3)</title>
 <style type="text/css">
 
 /*
@@ -310,17 +310,17 @@ ul.auto-toc {
 </style>
 </head>
 <body>
-<div class="document" id="xy-tools-plugin-version-0-2">
-<h1 class="title">XY Tools plugin (version 0.2)</h1>
+<div class="document" id="xy-tools-plugin-version-0-3">
+<h1 class="title">XY Tools plugin (version 0.3)</h1>
 
 <div class="section" id="aim">
 <h1>Aim</h1>
-<p>The idea of the xy-tools-plugin is to group some functionality needed when you often work with tables with x and y columns (eg Excel files, dbf files or even txt/csv files).</p>
+<p>The idea of the xy-tools-plugin is to group some functionality needed when you often work with tables with x and y columns (eg spreadsheet files (Libre/OpenOffice, Excel), dbf files or even txt/csv files).</p>
 <p>The plugin has the following functions:</p>
 <ol class="arabic simple">
 <li>fill an x- and y-column of a given attribute table by clicking on a (reference) map.</li>
 <li>after 'filling the x and y column' you are able to export the table to a point shape file by using the x- and y-column as coordinates for the Point geometries</li>
-<li>open Excel files, either as a Memory-layer with geometries on 0,0 or using coordinates from an x and y column</li>
+<li>open Libre/OpenOffice/Excel spreadsheet files, either as a Memory-layer with geometries on 0,0 or using coordinates from an x and y column</li>
 <li>save the attribute table of a layer as an Excel file</li>
 </ol>
 <p>It started off as a plugin for a user who had an excell file with
@@ -353,15 +353,32 @@ save your edits, or discard them.</p>
 <p>Geometries of the shape file will be using the x- and y- columns for there coordinates.</p>
 <img alt="img/save.png" src="img/save.png" />
 </div>
-<div class="section" id="opening-an-excel-file-as-a-vector-layer">
-<h2>Opening an Excel file as a Vector layer</h2>
+<div class="section" id="opening-an-libre-openoffice-spreadsheet-file-as-a-vector-layer">
+<h2>Opening an Libre/OpenOffice spreadsheet file as a Vector layer</h2>
+<p><em>(to use this functionality you should have the python-uno library installed. For Linux you can probably install it via your package manager. On Windows it is harder: you can install it via the normal installer as addition/module, but there seems to be an error with the python path. The plugin cannot find it. If somebody knows a solution for this, please let me know. )</em></p>
+<p>Op open an Libre/OpenOffice (.ods) file and use it either as a attribute table OR as a point vector layer, choose 'Open Libre/OpenOffice file as attribute tabl or Point layer' from the xytools plugin menu options:</p>
+<img alt="img/save.png" src="img/save.png" />
+<p>You will be given the option to choose an x- and y-column from the spreadsheet file. The values of those columns will be used as x and y coordinate for the Point features of the Memory layer.</p>
+<p>You can also CANCEL the xy-column dialog, then the rows will also be read as features, BUT the geometries will all have zero's as x and y</p>
+<p>There are some things to consider for this:</p>
+<ul class="simple">
+<li>at this moment only the first sheet in the spreadsheet is loaded</li>
+<li>the data file is read into a 'Memory layer'. That is it is volatile: <strong>edits in this layer will NOT be saved into the excel file</strong>  AND quiting QGIS will discard the layer. If you want to save the layer, use the normal QGIS menu options to save the memory layer to something else like a shapefile, a spatialite file or an KML-file.</li>
+<li>the first row of the spreadsheet file will be read as attribute names/keys. So if you have data without a column header, please add one before opening it in qgis with the xytool plugin</li>
+<li>when there is a non numeric value in one of the cells of the spreadsheet table, the proces is stopped and the layer is discarded</li>
+<li>on windows there is some problem with python paths, we have to find a solution for this (adding the path to the uno-dll to the pythonpath?)</li>
+</ul>
+</div>
+<div class="section" id="opening-an-excel-spreadsheet-file-as-a-vector-layer">
+<h2>Opening an Excel spreadsheet file as a Vector layer</h2>
 <p><em>(to use this functionality you should have the xlrd library installed. On Windows you can get it via osgeo4w. For Linux you can probably install it via your package manager. Or you can get it from the project page: http://www.python-excel.org/ )</em></p>
-<p>Op open an Excel file and use it either as a attribute table OR as a point vector layer, choose 'Open Excel file as attribute tabl or Point layer' from the xytools plugin menu options:</p>
+<p>Op open an Excel (.xls) file and use it either as a attribute table OR as a point vector layer, choose 'Open Excel file as attribute table or Point layer' from the xytools plugin menu options:</p>
 <img alt="img/save.png" src="img/save.png" />
 <p>You will be given the option to choose an x- and y-column from the excel file. The values of those columns will be used as x and y coordinate for the Point features of the Memory layer.</p>
 <p>You can also CANCEL the xy-column dialog, then the rows will also be read as features, BUT the geometries will all have zero's as x and y</p>
 <p>There are some things to consider for this:</p>
 <ul class="simple">
+<li>at this moment only the first sheet in the spreadsheet is loaded</li>
 <li>the excel file is read into a 'Memory layer'. That is it is volatile: <strong>edits in this layer will NOT be saved into the excel file</strong>  AND quiting QGIS will discard the layer. If you want to save the layer, use the normal QGIS menu options to save the memory layer to something else like a shapefile, a spatialite file or an KML-file.</li>
 <li>the first row of the excel file will be read as attribute names/keys. So if you have data without a column header, please add one before opening it in qgis with the xytool plugin</li>
 <li>when there is a non numeric value in one of the cells of the excel table, the proces is stopped and the layer is discarded</li>
@@ -383,6 +400,7 @@ the underlying OGR-library.</p>
 <p>So: for a dbf you can add and remove records. But if you want further editing: like inserting records, adding columns etc,
 either use Libre/Open-office, or one of the other qgis table plugins.</p>
 <ul class="simple">
+<li>0.3.0 open Libre/OpenOffice Calc spreadsheets (python-uno lib needed)</li>
 <li>0.2.0 open Excel files either as attribute table, or as point shape file (python xlrd lib needed).  Ability to save current attributetable as an Excel file (python xlwt lib needed). Attiion of plugin metadata to plugin.</li>
 <li>0.1.2 coordinates as floats instead of ints, Makefile and dist changes</li>
 <li>0.1.1 first public version in git</li>

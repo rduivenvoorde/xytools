@@ -1,7 +1,5 @@
 import xlwt
 from xlrd import open_workbook
-
-from datetime import datetime
 from PyQt4.QtCore import *
 
 
@@ -28,7 +26,6 @@ class Reader:
                     values.append(s.cell(row,col).value)
                 #print ','.join(values)
                 rows.append(values)
-            #print
         return rows
 
 class Writer:
@@ -59,12 +56,9 @@ class Writer:
     def openFile(self):
         wb = open_workbook('/home/richard/temp/prov/prov.xls')
         for s in wb.sheets():
-            #print 'Sheet:',s.name
             for row in range(s.nrows):
                 values = []
                 for col in range(s.ncols):
                     values.append(s.cell(row,col).value)
-            #print ','.join(values)
-            #print
 
 

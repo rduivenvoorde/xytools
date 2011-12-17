@@ -22,9 +22,9 @@
 def name():
     return "XyTools"
 def description():
-    return "Tools for managing tabular data with x y columns"
+    return "Tools for managing tabular data with x y columns. It can open spreadsheet files (Libre/OpenOffice, Excel) as point layers and save attribute tables as Excel file"
 def version():
-    return "Version 0.2.0"
+    return "Version 0.3"
 def icon():
     return "icon.png"
 def qgisMinimumVersion():
