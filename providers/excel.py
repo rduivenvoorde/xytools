@@ -43,11 +43,14 @@ class Writer:
     def writeAttributeRow(self, rowNr, attributes):
         colNr = 0
         for cell in attributes:
-            if type(cell) == QString:
-                # cast to QVariable
-                # TODO: do this better
-                cell = QVariant(cell)
-            self.ws.write( rowNr, colNr, unicode(cell.toString()) )
+            cell = QVariant(cell)
+            if cell.canConvert(QVariant.Int) and cell.toInt()[1]:
+                cell = cell.toInt()[0]
+            elif cell.canConvert(QVariant.Double) and cell.toDouble()[1]:
+                cell = cell.toDouble()[0]
+            else:
+                cell = unicode(cell.toString())
+            self.ws.write( rowNr, colNr, cell )
             colNr = colNr+1
 
     def saveFile(self):
