@@ -64,7 +64,7 @@ deploy: compile
 dist: cleandist deploy
 	mkdir -p $(TEMPDIR)/$(PLUGINNAME)
 	cp -r * $(TEMPDIR)/$(PLUGINNAME)
-	cd $(TEMPDIR); zip -9rv $(PLUGINNAME).zip $(PLUGINNAME) -i *.py *.html *.png *.txt
+	cd $(TEMPDIR); zip -9rv $(PLUGINNAME).zip $(PLUGINNAME) -i \*.py \*.html \*.png \*.txt
 	@echo "You can find the plugin for the qgis repo here: $(TEMPDIR)/$(PLUGINNAME).zip"
 
 cleandist:
