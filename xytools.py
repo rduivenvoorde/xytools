@@ -48,8 +48,13 @@ class XyTools:
     def initGui(self):
         # we add the action to the same action group as another digitize action
         # in combination with the setCheckable it makes it will be unchecked automagically
-        self.action = QAction(QIcon(":/plugins/xytools/icon.png"), \
-                "XY tools", self.iface.actionCapturePoint().actionGroup())
+        # 27dec2012 RD: to be honest, I'm not sure if we need this old stuff:
+        if hasattr(self.iface, "actionCapturePoint"):
+            self.action = QAction(QIcon(":/plugins/xytools/icon.png"), \
+                    "XY tools", self.iface.actionCapturePoint().actionGroup())
+        else:
+            self.action = QAction(QIcon(":/plugins/xytools/icon.png"), \
+                    "XY tools", self.iface.mainWindow())
         self.action.setCheckable(True)
         # connect the action to the run method
         QObject.connect(self.action, SIGNAL("triggered(bool)"), self.xyToolClick)
@@ -58,38 +63,47 @@ class XyTools:
         self.aboutAction = QAction(QIcon(":/plugins/xytools/help.png"), \
                               "About", self.iface.mainWindow())
         self.aboutAction.setWhatsThis("Xy Tools Plugin About")
-        self.iface.addPluginToMenu("&XY tools", self.aboutAction)
         QObject.connect(self.aboutAction, SIGNAL("activated()"), self.about)
         # help
         self.helpAction = QAction(QIcon(":/plugins/xytools/help.png"), \
                               "Help", self.iface.mainWindow())
         self.helpAction.setWhatsThis("Xy Tools Plugin Help")
-        self.iface.addPluginToMenu("&XY tools", self.helpAction)
         QObject.connect(self.helpAction, SIGNAL("activated()"), self.help)
         # save as shape
         self.shapeSaveAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
                               "Save attribute table as Point shape file", self.iface.mainWindow())
         self.shapeSaveAction.setWhatsThis("Xy Tools Plugin Save attribute table as Shape file (using xy-Column values for geometries!)")
-        self.iface.addPluginToMenu("&XY tools", self.shapeSaveAction)
         QObject.connect(self.shapeSaveAction, SIGNAL("activated()"), self.shapeSave)
         # save as excel
         self.excelSaveAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
                               "Save attribute table as Excel file", self.iface.mainWindow())
         self.excelSaveAction.setWhatsThis("Xy Tools Plugin Save Attribute Table as Excel File")
-        self.iface.addPluginToMenu("&XY tools", self.excelSaveAction)
         QObject.connect(self.excelSaveAction, SIGNAL("activated()"), self.excelSave)
         # open excel file
         self.excelOpenAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
                               "Open Excel file as attribute table or Point layer", self.iface.mainWindow())
         self.excelOpenAction.setWhatsThis("Xy Tools Plugin Open Excel file as Attribute table or Point layer")
-        self.iface.addPluginToMenu("&XY tools", self.excelOpenAction)
         QObject.connect(self.excelOpenAction, SIGNAL("activated()"), self.excelOpen)
         # open open/libreoffice file
         self.unoOpenAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
                               "Open Libre/OpenOffice Calc file as attribute table or Point layer", self.iface.mainWindow())
         self.unoOpenAction.setWhatsThis("Xy Tools Plugin Open Libre/OpenOffice Calc file as Attribute table or Point layer")
-        self.iface.addPluginToMenu("&XY tools", self.unoOpenAction)
         QObject.connect(self.unoOpenAction, SIGNAL("activated()"), self.unoOpen)
+
+        if hasattr ( self . iface , "addPluginToVectorMenu" ):
+            self.iface.addPluginToVectorMenu("&XY tools", self.shapeSaveAction)
+            self.iface.addPluginToVectorMenu("&XY tools", self.excelSaveAction)
+            self.iface.addPluginToVectorMenu("&XY tools", self.excelOpenAction)
+            self.iface.addPluginToVectorMenu("&XY tools", self.unoOpenAction)
+            self.iface.addPluginToVectorMenu("&XY tools", self.aboutAction)
+            self.iface.addPluginToVectorMenu("&XY tools", self.helpAction)
+        else:
+            self.iface.addPluginToMenu("&XY tools", self.shapeSaveAction)
+            self.iface.addPluginToMenu("&XY tools", self.excelSaveAction)
+            self.iface.addPluginToMenu("&XY tools", self.excelOpenAction)
+            self.iface.addPluginToMenu("&XY tools", self.unoOpenAction)
+            self.iface.addPluginToMenu("&XY tools", self.aboutAction)
+            self.iface.addPluginToMenu("&XY tools", self.helpAction)
 
         # add xypick button to edit/digitize toolbar
         editMenu = self.iface.digitizeToolBar()
@@ -216,7 +230,6 @@ class XyTools:
         fn, fileExtension = path.splitext(unicode(filename))
         if len(fn) == 0: # user choose cancel
             return
-        print fileExtension
         if fileExtension != '.xls':
             filename = filename + '.xls'
         try:
@@ -301,15 +314,26 @@ class XyTools:
 
 
     def unload(self):
-        # Remove the plugin menu item and icon
-        #self.iface.removePluginMenu("&XY tools",self.action)
-        self.iface.removePluginMenu("&XY tools",self.helpAction)
-        self.iface.removePluginMenu("&XY tools",self.aboutAction)
-        self.iface.removePluginMenu("&XY tools",self.shapeSaveAction)
-        self.iface.removePluginMenu("&XY tools",self.excelSaveAction)
-        self.iface.removePluginMenu("&XY tools",self.excelOpenAction)
-        self.iface.removePluginMenu("&XY tools",self.unoOpenAction)
-        self.iface.removeToolBarIcon(self.action)
+        # check if Raster menu available and remove our buttons from appropriate
+        # menu and toolbar
+        if hasattr ( self . iface , "addPluginToVectorMenu" ):
+            #self.iface.removePluginVectorMenu("&XY tools",self.action)
+            self.iface.removePluginVectorMenu("&XY tools",self.helpAction)
+            self.iface.removePluginVectorMenu("&XY tools",self.aboutAction)
+            self.iface.removePluginVectorMenu("&XY tools",self.shapeSaveAction)
+            self.iface.removePluginVectorMenu("&XY tools",self.excelSaveAction)
+            self.iface.removePluginVectorMenu("&XY tools",self.excelOpenAction)
+            self.iface.removePluginVectorMenu("&XY tools",self.unoOpenAction)
+            self.iface.removeWebToolBarIcon(self.action)
+        else:
+            #self.iface.removePluginMenu("&XY tools",self.action)
+            self.iface.removePluginMenu("&XY tools",self.helpAction)
+            self.iface.removePluginMenu("&XY tools",self.aboutAction)
+            self.iface.removePluginMenu("&XY tools",self.shapeSaveAction)
+            self.iface.removePluginMenu("&XY tools",self.excelSaveAction)
+            self.iface.removePluginMenu("&XY tools",self.excelOpenAction)
+            self.iface.removePluginMenu("&XY tools",self.unoOpenAction)
+            self.iface.removeToolBarIcon(self.action)
 
         # remove xypick button to edit/digitize toolbar
         editMenu = self.iface.digitizeToolBar()
@@ -365,7 +389,11 @@ class XyTools:
         else:
             crs = self.canvas.mapRenderer().destinationCrs()
         layer.setCrs(crs)
-        QgsMapLayerRegistry.instance().addMapLayer(layer)
+        if hasattr(QgsMapLayerRegistry.instance(), "addMapLayer"):
+            # QGIS < 2.0
+            QgsMapLayerRegistry.instance().addMapLayer(layer)
+        else:
+            QgsMapLayerRegistry.instance().addMapLayers( [layer] )
         return layer
 
     def help(self):

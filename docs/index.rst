@@ -137,6 +137,10 @@ the underlying OGR-library.
 So: for a dbf you can add and remove records. But if you want further editing: like inserting records, adding columns etc,
 either use Libre/Open-office, or one of the other qgis table plugins.
 
+- 0.3.2   fix for 2.0 api changes, moving to vector menu
+
+- 0.3.1   fix docs (no imgs), fix double .xls extension (#4658), number and text cells now (#4656)
+
 - 0.3.0 open Libre/OpenOffice Calc spreadsheets (python-uno lib needed)
 
 - 0.2.0 open Excel files either as attribute table, or as point shape file (python xlrd lib needed).  Ability to save current attributetable as an Excel file (python xlwt lib needed). Attiion of plugin metadata to plugin.

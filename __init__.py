@@ -24,9 +24,15 @@ def name():
 def description():
     return "Tools for managing tabular data with x y columns. It can open spreadsheet files (Libre/OpenOffice, Excel) as point layers and save attribute tables as Excel file"
 def version():
-    return "Version 0.3.1"
+    return "Version 0.3.2"
 def icon():
     return "icon.png"
+def author():
+    return "Richard Duivenvoorde"
+def email():
+    return "richard@duif.net"
+def category():
+  return "Vector"
 def qgisMinimumVersion():
     return "1.6"
 def classFactory(iface):
