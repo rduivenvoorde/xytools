@@ -20,6 +20,7 @@
 """
 
 from PyQt4 import QtCore, QtGui
+from qgis.core import *
 from ui_xytools import Ui_XyTools
 # create the dialog for zoom to point
 class XyToolsDialog(QtGui.QDialog):
@@ -30,10 +31,19 @@ class XyToolsDialog(QtGui.QDialog):
         self.ui = Ui_XyTools()
         self.ui.setupUi(self)
         # fill dropdowns
-        fields = QtCore.QStringList()
-        fields.append(comboMsg)
-        for field in fieldMap.values():
-            fields.append(field.name())
+        if QGis.QGIS_VERSION_INT < 10900:
+            # Use the old API style
+            fields = QtCore.QStringList()
+            fields.append(comboMsg)
+            for field in fieldMap.values():
+                fields.append(field.name())
+        else:
+            # Use the new API style
+            fields = []
+            fields.append(comboMsg)
+            for i in range(fieldMap.count()):
+                name = fieldMap.at(i).name()
+                fields.append( name )
         self.ui.cmbXcoord.clear()
         self.ui.cmbYcoord.clear()
         self.ui.cmbXcoord.addItems(fields)

@@ -135,7 +135,7 @@ class XyTools:
 
 
     def excelOpen(self):
-        filename = QFileDialog.getOpenFileName(self.iface.mainWindow(),
+        (filename, filter) = QFileDialog.getOpenFileNameAndFilter(self.iface.mainWindow(),
                     "Please choose an Excel spreadsheet file to open...",
                     ".",
                     "Excel files (*.xls)",
@@ -153,7 +153,7 @@ class XyTools:
 
 
     def unoOpen(self):
-        filename = QFileDialog.getOpenFileName(self.iface.mainWindow(),
+        (filename, filter) = QFileDialog.getOpenFileNameAndFilter(self.iface.mainWindow(),
                     "Please choose an Libre/OpenOffice spreadsheet file to open...",
                     ".",
                     "Libre/OpenOffice OOcalc files (*.ods)",
@@ -184,7 +184,10 @@ class XyTools:
         for col in rows[0]:
             layer.dataProvider().addAttributes([QgsField(unicode(col), QVariant.String)])
         # see: http://osgeo-org.1803224.n2.nabble.com/Add-attributes-to-memory-provider-with-python-td6073149.html
-        layer.updateFieldMap()
+        if hasattr(layer, 'updateFields'):
+            layer.updateFields()
+        else: # <= 1.8 compatibility
+            layer.updateFieldMap()
         xyOk = False
         if self.getXyColumns(layer):
             xyOk = True
@@ -207,7 +210,11 @@ class XyTools:
                     f.setGeometry(QgsGeometry.fromPoint( QgsPoint(x,y) ) )
                 else:
                     f.setGeometry( QgsGeometry.fromWkt('POINT(0 0)') )
-                f.setAttributeMap( dict(zip( range(0,len(row)) ,row ))  )
+                if QGis.QGIS_VERSION_INT < 10900:
+                    f.setAttributeMap( dict(zip( range(0,len(row)) ,row ))  )
+                else:
+                    # put row in a list, because UNO returns a tuple, which raises an exception
+                    f.setAttributes( list(row)  )
                 layer.dataProvider().addFeatures([f])
         layer.updateExtents()
         layer.reload()
@@ -222,7 +229,7 @@ class XyTools:
         if self.layer == None: 
             QMessageBox.warning(self.iface.mainWindow(), "No active layer", "Please make an vector layer active before saving it to excel file.")
             return
-        filename = QFileDialog.getSaveFileName(self.iface.mainWindow(),
+        (filename, filter) = QFileDialog.getSaveFileNameAndFilter(self.iface.mainWindow(),
                     "Please save excel file as...",
                     ".",
                     "Excel files (*.xls)",
@@ -239,7 +246,6 @@ class XyTools:
             return
         xlw = excel.Writer(filename)
         self.layer = self.iface.activeLayer()
-        prov = self.layer.dataProvider()
         selection = None
         if self.layer.selectedFeatureCount() > 0:
             if QMessageBox.question(self.iface.mainWindow(), 
@@ -247,28 +253,45 @@ class XyTools:
                 ("You have a selection in this layer. Only export this selection?\n" "Click Yes to export selection only, click No to export all rows."), 
                 QMessageBox.No, QMessageBox.Yes) == QMessageBox.Yes:
                     selection = self.layer.selectedFeaturesIds()
-        prov.select(prov.attributeIndexes())
         feature = QgsFeature();
         rowNr = 0
-        while prov.nextFeature(feature):
-            # attribute names
-            if rowNr == 0:
-                values = []
-                for (i, field) in prov.fields().iteritems():
-                    values.append(field.name().trimmed())
-                xlw.writeAttributeRow( rowNr, values )
-                rowNr+=1
-            # and attribute values, either for all or only for selection
-            if selection == None or feature.id() in selection:
-                values = feature.attributeMap().values()
-                xlw.writeAttributeRow( rowNr, values )
-                rowNr+=1
+        if QGis.QGIS_VERSION_INT < 10900:
+            prov = self.layer.dataProvider()
+            prov.select(prov.attributeIndexes())
+            while prov.nextFeature(feature):
+                # attribute names
+                if rowNr == 0:
+                    values = []
+                    for (i, field) in prov.fields().iteritems():
+                        values.append(field.name().trimmed())
+                    xlw.writeAttributeRow( rowNr, values )
+                    rowNr+=1
+                # and attribute values, either for all or only for selection
+                if selection == None or feature.id() in selection:
+                    values = feature.attributeMap().values()
+                    xlw.writeAttributeRow( rowNr, values )
+                    rowNr+=1
+        else:
+            prov = self.layer.getFeatures()
+            while prov.nextFeature(feature):
+                # attribute names
+                if rowNr == 0:
+                    values = []
+                    for field in self.layer.dataProvider().fields():
+                        values.append(field.name().strip())
+                    xlw.writeAttributeRow( rowNr, values )
+                    rowNr+=1
+                # and attribute values, either for all or only for selection
+                if selection == None or feature.id() in selection:
+                    values = feature.attributes()
+                    xlw.writeAttributeRow( rowNr, values )
+                    rowNr+=1
         xlw.saveFile()
         QMessageBox.information(self.iface.mainWindow(), "Success", "Successfully saved as xls file")
 
 
     def writeToShape(self):
-        filename = QFileDialog.getSaveFileName(self.iface.mainWindow(),
+        (filename, filter) = QFileDialog.getSaveFileNameAndFilter(self.iface.mainWindow(),
                     "Please save shape file as...",
                     ".",
                     "Esri shape files (*.shp)",
@@ -279,14 +302,22 @@ class XyTools:
         fields = self.layer.dataProvider().fields()
         writer = QgsVectorFileWriter(unicode(filename), "UTF8", fields, QGis.WKBPoint, None)
         feature = QgsFeature();
-        prov = self.layer.dataProvider()
         #   with  ALL attributes, WITHIN extent, WITHOUT geom, AND NOT using Intersect instead of bbox
-        prov.select(prov.attributeIndexes(), prov.extent(), False, False)
-        while prov.nextFeature(feature):
-            x=feature.attributeMap()[self.layerInfo[self.layer].xIdx].toFloat()
-            y=feature.attributeMap()[self.layerInfo[self.layer].yIdx].toFloat()
-            feature.setGeometry(QgsGeometry.fromPoint(QgsPoint(x[0],y[0])))
-            writer.addFeature(feature)
+        if QGis.QGIS_VERSION_INT < 10900:
+            prov = self.layer.dataProvider()
+            prov.select(prov.attributeIndexes(), prov.extent(), False, False)
+            while prov.nextFeature(feature):
+                x = feature.attributeMap()[self.layerInfo[self.layer].xIdx].toFloat()
+                y = feature.attributeMap()[self.layerInfo[self.layer].yIdx].toFloat()
+                feature.setGeometry(QgsGeometry.fromPoint(QgsPoint(x[0],y[0])))
+                writer.addFeature(feature)
+        else:
+            prov = self.layer.getFeatures( QgsFeatureRequest().setFilterRect(prov.extent()) )
+            while prov.nextFeature(feature):
+                x = float(feature[self.layerInfo[self.layer].xIdx])
+                y = float(feature[self.layerInfo[self.layer].yIdx])
+                feature.setGeometry(QgsGeometry.fromPoint(QgsPoint(x,y)))
+                writer.addFeature(feature)
         # flush and delete
         del writer
         QMessageBox.information(self.iface.mainWindow(), "Success", "Successfully saved as shape")
@@ -403,11 +434,11 @@ class XyTools:
         self.iface.openURL(file, False)
 
     def about(self):
-        infoString = QString("Written by Richard Duivenvoorde\nEmail - richard@duif.net\n")
-        infoString = infoString.append("Company - http://www.webmapper.net\n")
-        infoString = infoString.append("Source: http://hub.qgis.org/projects/xytools/")
+        infoString =  u"Written by Richard Duivenvoorde\nEmail - richard@duif.net\n"
+        infoString += u"Company - http://www.webmapper.net\n"
+        infoString += u"Source: https://github.com/rduivenvoorde/xytools"
         QMessageBox.information(self.iface.mainWindow(), \
-                            "XY tools Plugin About", infoString)
+                            u"XY tools Plugin About", infoString)
 
     def mapClick(self, xy):
         self.layerInfo[self.layer].setXY(xy.x(), xy.y())
@@ -466,21 +497,28 @@ class XyTable():
         fid = self.checkGetSelectedFeatureId()
         if fid==None or self.xIdx == None or self.yIdx == None:
             return
-        f = QgsFeature()
-        self.layer.featureAtId(fid, f, True, True)
-        # x and y are QVariants
-        y = f.attributeMap()[self.yIdx]
-        x = f.attributeMap()[self.xIdx]
-        if x.canConvert(QVariant.Double) and y.canConvert(QVariant.Double): # not NULL
-            xd = x.toDouble()[0]
-            yd = y.toDouble()[0]
-            xy = QgsPoint(xd,yd)
-            self.setMarker(xd, yd)
-            if not self.canvas.extent().contains(xy) and (xd>0 and yd>0):
-                width = self.canvas.extent().width()
-                height = self.canvas.extent().height()
-                self.canvas.setExtent(QgsRectangle(xd-width/2,yd-height/2,xd+width/2,yd+height/2))
-                self.canvas.refresh()
+        # x and y are QVariants in QGIS <= 1.8
+        if QGis.QGIS_VERSION_INT < 10900:
+            f = QgsFeature()
+            self.layer.featureAtId(fid, f, True, True)
+            y = f.attributeMap()[self.yIdx]
+            x = f.attributeMap()[self.xIdx]
+        else:
+            #self.layer.select(fid)
+            f = self.layer.selectedFeatures()[0]
+            y = f.attributes()[self.yIdx]
+            x = f.attributes()[self.xIdx]
+        if x != NULL and y != NULL: # not NULL
+            xd = float(x)
+            yd = float(y)
+        xy = QgsPoint(xd,yd)
+        self.setMarker(xd, yd)
+        if not self.canvas.extent().contains(xy) and (xd>0 and yd>0):
+            width = self.canvas.extent().width()
+            height = self.canvas.extent().height()
+            self.canvas.setExtent(QgsRectangle(xd-width/2,yd-height/2,xd+width/2,yd+height/2))
+            self.canvas.refresh()
+
 
     def setMarker(self, x,y):
         self.deleteMarker()

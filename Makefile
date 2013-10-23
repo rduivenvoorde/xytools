@@ -26,7 +26,7 @@ TEMPDIR = /tmp
 
 PY_FILES = xytools.py xytoolsdialog.py __init__.py
 
-EXTRAS = icon.png help.png 
+EXTRAS = icon.png help.png metadata.txt
 
 DOCS = docs/*
 
@@ -47,17 +47,17 @@ compile: $(UI_FILES) $(RESOURCE_FILES)
 
 # The deploy  target only works on unix like operating system where
 # the Python plugin directory is located at:
-# $HOME/.qgis/python/plugins
+# $HOME/.qgis2/python/plugins
 deploy: compile
-	mkdir -p $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
-	cp -vrf $(PY_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
-	mkdir -p $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/providers
-	cp -vrf providers/*.py $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/providers
-	cp -vf $(UI_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
-	cp -vf $(RESOURCE_FILES) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
-	cp -vrf $(EXTRAS) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)
-	mkdir -p $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/docs
-	cp -vrf $(DOCS) $(HOME)/.qgis/python/plugins/$(PLUGINNAME)/docs/
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	cp -vrf $(PY_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/providers
+	cp -vrf providers/*.py $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/providers
+	cp -vf $(UI_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	cp -vf $(RESOURCE_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	cp -vrf $(EXTRAS) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/docs
+	cp -vrf $(DOCS) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/docs/
 
 
 

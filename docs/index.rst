@@ -137,6 +137,8 @@ the underlying OGR-library.
 So: for a dbf you can add and remove records. But if you want further editing: like inserting records, adding columns etc,
 either use Libre/Open-office, or one of the other qgis table plugins.
 
+- 0.3.3   further fixing for 2.0 api changes
+
 - 0.3.2   fix for 2.0 api changes, moving to vector menu
 
 - 0.3.1   fix docs (no imgs), fix double .xls extension (#4658), number and text cells now (#4656)
@@ -169,3 +171,7 @@ And
 ---
 
 If you find bugs or have ideas for this plugin, contact Richard Duivenvoorde ( richard@duif.net ).
+
+Code lives at: https://github.com/rduivenvoorde/xytools
+
+Issues and bugs: https://github.com/rduivenvoorde/xytools/issues
