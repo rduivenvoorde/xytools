@@ -312,7 +312,7 @@ class XyTools:
                 feature.setGeometry(QgsGeometry.fromPoint(QgsPoint(x[0],y[0])))
                 writer.addFeature(feature)
         else:
-            prov = self.layer.getFeatures( QgsFeatureRequest().setFilterRect(prov.extent()) )
+            prov = self.layer.getFeatures( QgsFeatureRequest().setFilterRect(self.layer.extent()) )
             while prov.nextFeature(feature):
                 x = float(feature[self.layerInfo[self.layer].xIdx])
                 y = float(feature[self.layerInfo[self.layer].yIdx])

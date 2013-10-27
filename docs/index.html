@@ -3,13 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.10: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.11: http://docutils.sourceforge.net/" />
 <title>XY Tools plugin (version 0.3)</title>
 <style type="text/css">
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 7514 2012-09-14 14:27:12Z milde $
+:Id: $Id: html4css1.css 7614 2013-02-21 15:55:51Z milde $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
@@ -313,6 +313,21 @@ table.docutils th.field-name, table.docinfo th.docinfo-name {
   white-space: nowrap ;
   padding-left: 0 }
 
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
 h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
 h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
   font-size: 100% }
@@ -413,13 +428,14 @@ the underlying OGR-library.</p>
 <p>So: for a dbf you can add and remove records. But if you want further editing: like inserting records, adding columns etc,
 either use Libre/Open-office, or one of the other qgis table plugins.</p>
 <ul class="simple">
+<li>0.3.4   save as shapefile fix (thanks Victor Gonzalez)</li>
 <li>0.3.3   further fixing for 2.0 api changes</li>
 <li>0.3.2   fix for 2.0 api changes, moving to vector menu</li>
 <li>0.3.1   fix docs (no imgs), fix double .xls extension (#4658), number and text cells now (#4656)</li>
-<li>0.3.0 open Libre/OpenOffice Calc spreadsheets (python-uno lib needed)</li>
-<li>0.2.0 open Excel files either as attribute table, or as point shape file (python xlrd lib needed).  Ability to save current attributetable as an Excel file (python xlwt lib needed). Attiion of plugin metadata to plugin.</li>
-<li>0.1.2 coordinates as floats instead of ints, Makefile and dist changes</li>
-<li>0.1.1 first public version in git</li>
+<li>0.3.0   open Libre/OpenOffice Calc spreadsheets (python-uno lib needed)</li>
+<li>0.2.0   open Excel files either as attribute table, or as point shape file (python xlrd lib needed).  Ability to save current attributetable as an Excel file (python xlwt lib needed). Attiion of plugin metadata to plugin.</li>
+<li>0.1.2   coordinates as floats instead of ints, Makefile and dist changes</li>
+<li>0.1.1   first public version in git</li>
 </ul>
 </div>
 <div class="section" id="ideas-todo">
