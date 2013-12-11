@@ -30,6 +30,9 @@ from qgis.gui import *
 import resources
 # Import the code for the dialog
 from xytoolsdialog import XyToolsDialog
+from xytools_fieldchooserdialog import XyToolsFieldChooser
+# Import utils module
+import utils
 
 class XyTools:
 
@@ -229,6 +232,19 @@ class XyTools:
         if self.layer == None: 
             QMessageBox.warning(self.iface.mainWindow(), "No active layer", "Please make an vector layer active before saving it to excel file.")
             return
+
+        fieldNames = utils.fieldNames(self.layer)
+        dlg = XyToolsFieldChooser(fieldNames)
+
+        names = []
+        while len(names) == 0:
+            dlg.show()
+            if dlg.exec_() == 0:
+                return
+            names = dlg.getSelectedFields()
+            if len(names) == 0:
+                QMessageBox.warning(self.iface.mainWindow(), "No fields selected", "Please select at least one field.")
+
         (filename, filter) = QFileDialog.getSaveFileNameAndFilter(self.iface.mainWindow(),
                     "Please save excel file as...",
                     ".",
@@ -254,38 +270,32 @@ class XyTools:
                 QMessageBox.No, QMessageBox.Yes) == QMessageBox.Yes:
                     selection = self.layer.selectedFeaturesIds()
         feature = QgsFeature();
-        rowNr = 0
+
+        xlw.writeAttributeRow(0, names)
+
+        rowNr = 1
         if QGis.QGIS_VERSION_INT < 10900:
             prov = self.layer.dataProvider()
             prov.select(prov.attributeIndexes())
             while prov.nextFeature(feature):
-                # attribute names
-                if rowNr == 0:
-                    values = []
-                    for (i, field) in prov.fields().iteritems():
-                        values.append(field.name().trimmed())
-                    xlw.writeAttributeRow( rowNr, values )
-                    rowNr+=1
-                # and attribute values, either for all or only for selection
+                # attribute values, either for all or only for selection
                 if selection == None or feature.id() in selection:
                     values = feature.attributeMap().values()
-                    xlw.writeAttributeRow( rowNr, values )
-                    rowNr+=1
+                    rowValues = []
+                    for field in names:
+                        rowValues.append(values[field])
+                    xlw.writeAttributeRow(rowNr, values)
+                    rowNr += 1
         else:
             prov = self.layer.getFeatures()
             while prov.nextFeature(feature):
-                # attribute names
-                if rowNr == 0:
-                    values = []
-                    for field in self.layer.dataProvider().fields():
-                        values.append(field.name().strip())
-                    xlw.writeAttributeRow( rowNr, values )
-                    rowNr+=1
-                # and attribute values, either for all or only for selection
+                # attribute values, either for all or only for selection
                 if selection == None or feature.id() in selection:
-                    values = feature.attributes()
-                    xlw.writeAttributeRow( rowNr, values )
-                    rowNr+=1
+                    values = []
+                    for field in names:
+                        values.append(feature.attribute(field))
+                    xlw.writeAttributeRow(rowNr, values)
+                    rowNr += 1
         xlw.saveFile()
         QMessageBox.information(self.iface.mainWindow(), "Success", "Successfully saved as xls file")
 

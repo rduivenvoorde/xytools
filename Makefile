@@ -24,20 +24,20 @@ PLUGINNAME = xytools
 # for building dist zip
 TEMPDIR = /tmp
 
-PY_FILES = xytools.py xytoolsdialog.py __init__.py
+PY_FILES = xytools.py xytoolsdialog.py xytools_fieldchooserdialog.py utils.py __init__.py
 
 EXTRAS = icon.png help.png metadata.txt
 
 DOCS = docs/*
 
-UI_FILES = ui_xytools.py
+UI_FILES = ui_xytools.py ui_field_chooser.py
 
 RESOURCE_FILES = resources.py
 
 default: compile
 
 compile: $(UI_FILES) $(RESOURCE_FILES)
-	rst2html.py docs/index.rst > docs/index.html
+	rst2html docs/index.rst > docs/index.html
 
 %.py : %.rc
 	pyrcc4 -o $@  $<
