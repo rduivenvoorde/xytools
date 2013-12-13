@@ -20,17 +20,17 @@
 """
 
 from PyQt4.QtGui import QDialog
-from ui_xytools import Ui_XyTools
+from ui_xy_fields import Ui_XyFields
 
 
 # create the dialog for zoom to point
-class XyToolsDialog(QDialog):
+class XyFieldsDialog(QDialog):
 
     def __init__(self, comboMsg, fieldNames, layerName):
         QDialog.__init__(self)
 
         # Set up the user interface from Designer.
-        self.ui = Ui_XyTools()
+        self.ui = Ui_XyFields()
         self.ui.setupUi(self)
 
         # fill dropdowns

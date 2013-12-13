@@ -3,7 +3,7 @@ from PyQt4.QtGui import QDialog, QListWidgetItem
 from ui_field_chooser import Ui_FieldChooser
 
 
-class XyToolsFieldChooser(QDialog):
+class FieldChooserDialog(QDialog):
 
     def __init__(self, fieldNames):
         QDialog.__init__(self)

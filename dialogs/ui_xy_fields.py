@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_xytools.ui'
+# Form implementation generated from reading ui file 'dialogs/ui_xy_fields.ui'
 #
-# Created: Wed Dec 14 23:00:30 2011
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Mon Dec 16 16:17:35 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -14,12 +14,12 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_XyTools(object):
-    def setupUi(self, XyTools):
-        XyTools.setObjectName(_fromUtf8("XyTools"))
-        XyTools.resize(338, 274)
-        XyTools.setModal(True)
-        self.groupxy = QtGui.QGroupBox(XyTools)
+class Ui_XyFields(object):
+    def setupUi(self, XyFields):
+        XyFields.setObjectName(_fromUtf8("XyFields"))
+        XyFields.resize(338, 274)
+        XyFields.setModal(True)
+        self.groupxy = QtGui.QGroupBox(XyFields)
         self.groupxy.setEnabled(True)
         self.groupxy.setGeometry(QtCore.QRect(20, 20, 289, 234))
         self.groupxy.setObjectName(_fromUtf8("groupxy"))
@@ -52,22 +52,22 @@ class Ui_XyTools(object):
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
         self.gridLayout_2.addWidget(self.textEdit, 0, 0, 1, 2)
 
-        self.retranslateUi(XyTools)
+        self.retranslateUi(XyFields)
         self.cmbXcoord.setCurrentIndex(-1)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), XyTools.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), XyTools.reject)
-        QtCore.QMetaObject.connectSlotsByName(XyTools)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), XyFields.accept)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), XyFields.reject)
+        QtCore.QMetaObject.connectSlotsByName(XyFields)
 
-    def retranslateUi(self, XyTools):
-        XyTools.setWindowTitle(QtGui.QApplication.translate("XyTools", "XyTools", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupxy.setTitle(QtGui.QApplication.translate("XyTools", "layer", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("XyTools", "X: ", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("XyTools", "Y:", None, QtGui.QApplication.UnicodeUTF8))
-        self.textEdit.setHtml(QtGui.QApplication.translate("XyTools", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+    def retranslateUi(self, XyFields):
+        XyFields.setWindowTitle(QtGui.QApplication.translate("XyFields", "XYTools - Coordinate fields", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupxy.setTitle(QtGui.QApplication.translate("XyFields", "layer", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("XyFields", "X: ", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("XyFields", "Y:", None, QtGui.QApplication.UnicodeUTF8))
+        self.textEdit.setHtml(QtGui.QApplication.translate("XyFields", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Please select two attribute colums from this layer.</p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">These columns will be used as X and Y columns.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+"</style></head><body style=\" font-family:\'Sans\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:10pt;\">Please select two attribute colums from this layer.</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Ubuntu\'; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:10pt;\">These columns will be used as X and Y columns.</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
 

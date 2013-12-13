@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Save as Excel</string>
+   <string>XYTools - Save as Excel</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>false</bool>

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_field_chooser.ui'
+# Form implementation generated from reading ui file 'dialogs/ui_field_chooser.ui'
 #
-# Created: Wed Dec 11 09:51:17 2013
+# Created: Fri Dec 13 17:45:45 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -61,7 +61,7 @@ class Ui_FieldChooser(object):
         QtCore.QMetaObject.connectSlotsByName(FieldChooser)
 
     def retranslateUi(self, FieldChooser):
-        FieldChooser.setWindowTitle(QtGui.QApplication.translate("FieldChooser", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
+        FieldChooser.setWindowTitle(QtGui.QApplication.translate("FieldChooser", "XYTools - Save as Excel", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("FieldChooser", "Choose fields:", None, QtGui.QApplication.UnicodeUTF8))
         self.selectAll.setText(QtGui.QApplication.translate("FieldChooser", "Select All", None, QtGui.QApplication.UnicodeUTF8))
         self.unselectAll.setText(QtGui.QApplication.translate("FieldChooser", "Unselect All", None, QtGui.QApplication.UnicodeUTF8))
