@@ -4,3 +4,6 @@
 .settings
 .coverage
 htmlcov
+dialogs/ui_*.py
+docs/index.html
+resources.py
