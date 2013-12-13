@@ -334,7 +334,8 @@ class XyTools:
 
 
     def getXyColumns(self, layer):
-        dlg = XyToolsDialog(self.XY_COMBO_MSG, layer.dataProvider().fields(), layer.name())
+        dlg = XyToolsDialog(self.XY_COMBO_MSG, utils.fieldNames(layer),
+                            layer.name())
         xyOK = False
         while not xyOK:
             dlg.show()
