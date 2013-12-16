@@ -37,7 +37,10 @@ RESOURCE_FILES = resources.py
 default: compile
 
 compile: $(UI_FILES) $(RESOURCE_FILES)
-	rst2html docs/index.rst > docs/index.html
+	@echo ============================== COMPILE ==============================
+	@echo -n Building docs...
+	@rst2html docs/index.rst > docs/index.html
+	@echo Done!
 
 %.py : %.rc
 	pyrcc4 -o $@  $<
@@ -60,7 +63,21 @@ deploy: compile
 	cp -vrf $(DOCS) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/docs/
 
 
+# It needs to have 'coverage' installed: pip install -U coverage
+test: compile
+	@echo =============================== TEST ================================
+	@coverage run -m unittest discover -t . -p "*_test.py"
+	
+coverage: test
+	@echo ============================= COVERAGE ==============================
+	@coverage report
 
+coverage-html: test
+	@echo ============================= COVERAGE ==============================
+	@echo -n Creating coverage report...
+	@coverage html
+	@echo Done!	
+	
 dist: cleandist deploy
 	mkdir -p $(TEMPDIR)/$(PLUGINNAME)
 	cp -r * $(TEMPDIR)/$(PLUGINNAME)

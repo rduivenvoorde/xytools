@@ -1,33 +1,24 @@
 import xlwt
 from xlrd import open_workbook
-from PyQt4.QtCore import *
-from qgis.core import *
+from PyQt4.QtCore import QVariant
+from qgis.core import QGis
 
 
 class Reader:
-
-    #fileName = '/home/richard/temp/prov/prov.xls'
-    fileName = ''
-
-    wb = None
-    ws = None
-
     def __init__(self, filename):
         self.fileName = filename
 
     def openFile(self):
         wb = open_workbook(self.fileName)
         rows = []
-        for s in wb.sheets():
-            #print 'Sheet:',s.name
-            #print '#rows:',s.nrows
-            for row in range(s.nrows):
-                values = []
-                for col in range(s.ncols):
-                    values.append(s.cell(row,col).value)
-                #print ','.join(values)
+        for sheet in wb.sheets():
+            for index in range(sheet.nrows):
+                row = sheet.row(index)
+                values = map(lambda cell: cell.value, row)
                 rows.append(values)
+
         return rows
+
 
 class Writer:
 
@@ -54,20 +45,10 @@ class Writer:
                 else:
                     cell = unicode(cell.toString())
             # handle NULL values by writing 'NULL'
-            if cell == NULL:
+            if not cell:
                 cell = 'NULL'
-            self.ws.write( rowNr, colNr, cell )
-            colNr = colNr+1
+            self.ws.write(rowNr, colNr, cell)
+            colNr = colNr + 1
 
     def saveFile(self):
         self.wb.save(self.fileName)
-
-    def openFile(self):
-        wb = open_workbook('/home/richard/temp/prov/prov.xls')
-        for s in wb.sheets():
-            for row in range(s.nrows):
-                values = []
-                for col in range(s.ncols):
-                    values.append(s.cell(row,col).value)
-
-
