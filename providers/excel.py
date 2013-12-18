@@ -47,6 +47,13 @@ class Writer:
             # handle NULL values by writing 'NULL'
             if not cell:
                 cell = 'NULL'
+            else:
+                cell = str(cell)
+                try:
+                    cell = float(cell)
+                except:
+                    pass
+
             self.ws.write(rowNr, colNr, cell)
             colNr = colNr + 1
 

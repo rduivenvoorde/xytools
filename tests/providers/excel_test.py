@@ -7,6 +7,7 @@ import unittest
 import os
 import tempfile
 from providers.excel import Reader, Writer
+from PyQt4.QtCore import QByteArray
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 SAMPLE = os.path.join(DATA_DIR, 'sample.xls')
@@ -42,7 +43,8 @@ class Test(unittest.TestCase):
         rows = reader.openFile()
         assert len(rows) == 2
         assert rows[0] == row0
-        assert rows[1] == row1
+        assert rows[1][0] == 0
+        assert rows[1][1] == 42
 
         os.remove(filename)
 
@@ -69,6 +71,22 @@ class Test(unittest.TestCase):
         reader = Reader(filename)
         rows = reader.openFile()
         assert rows[1][1] == 'NULL'
+
+        os.remove(filename)
+
+    def testQByteArrayCell(self):
+        _, filename = tempfile.mkstemp('.xls')
+        writer = Writer(filename)
+        row0 = ['ID', 'NUMBER']
+        row1 = [QByteArray('0'), QByteArray('42')]
+        writer.writeAttributeRow(0, row0)
+        writer.writeAttributeRow(1, row1)
+        writer.saveFile()
+
+        reader = Reader(filename)
+        rows = reader.openFile()
+        assert rows[1][0] == 0
+        assert rows[1][1] == 42
 
         os.remove(filename)
 
