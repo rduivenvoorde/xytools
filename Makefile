@@ -24,20 +24,25 @@ PLUGINNAME = xytools
 # for building dist zip
 TEMPDIR = /tmp
 
-PY_FILES = xytools.py xytoolsdialog.py __init__.py
+PY_FILES = xytools.py utils.py __init__.py
 
-EXTRAS = icon.png help.png metadata.txt
+EXTRAS = metadata.txt
 
 DOCS = docs/*
 
-UI_FILES = ui_xytools.py
+IMAGES = images/*
+
+UI_DIALOG_FILES = dialogs/ui_xy_fields.py dialogs/ui_field_chooser.py
 
 RESOURCE_FILES = resources.py
 
 default: compile
 
-compile: $(UI_FILES) $(RESOURCE_FILES)
-	rst2html.py docs/index.rst > docs/index.html
+compile: $(UI_DIALOG_FILES) $(RESOURCE_FILES)
+	@echo ============================== COMPILE ==============================
+	@echo -n Building docs...
+	@rst2html docs/index.rst > docs/index.html
+	@echo Done!
 
 %.py : %.rc
 	pyrcc4 -o $@  $<
@@ -51,16 +56,33 @@ compile: $(UI_FILES) $(RESOURCE_FILES)
 deploy: compile
 	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
 	cp -vrf $(PY_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
-	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/providers
-	cp -vrf providers/*.py $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/providers
-	cp -vf $(UI_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
-	cp -vf $(RESOURCE_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
 	cp -vrf $(EXTRAS) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	cp -vf $(RESOURCE_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/dialogs
+	cp -vf $(UI_DIALOG_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/dialogs
+	cp -vrf dialogs/*.py $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/dialogs
 	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/docs
 	cp -vrf $(DOCS) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/docs/
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/images
+	cp -vrf $(IMAGES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/images
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/providers
+	cp -vrf providers/*.py $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/providers
 
+# It needs to have 'coverage' installed: pip install -U coverage
+test: compile
+	@echo =============================== TEST ================================
+	@coverage run -m unittest discover -t . -p "*_test.py"
+	
+coverage: test
+	@echo ============================= COVERAGE ==============================
+	@coverage report
 
-
+coverage-html: test
+	@echo ============================= COVERAGE ==============================
+	@echo -n Creating coverage report...
+	@coverage html
+	@echo Done!	
+	
 dist: cleandist deploy
 	mkdir -p $(TEMPDIR)/$(PLUGINNAME)
 	cp -r * $(TEMPDIR)/$(PLUGINNAME)

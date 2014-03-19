@@ -19,39 +19,32 @@
  ***************************************************************************/
 """
 
-from PyQt4 import QtCore, QtGui
-from qgis.core import *
-from ui_xytools import Ui_XyTools
-# create the dialog for zoom to point
-class XyToolsDialog(QtGui.QDialog):
+from PyQt4.QtGui import QDialog
+from ui_xy_fields import Ui_XyFields
 
-    def __init__(self, comboMsg, fieldMap, layerName):
-        QtGui.QDialog.__init__(self)
+
+# create the dialog for zoom to point
+class XyFieldsDialog(QDialog):
+
+    def __init__(self, comboMsg, fieldNames, layerName):
+        QDialog.__init__(self)
+
         # Set up the user interface from Designer.
-        self.ui = Ui_XyTools()
+        self.ui = Ui_XyFields()
         self.ui.setupUi(self)
+
         # fill dropdowns
-        if QGis.QGIS_VERSION_INT < 10900:
-            # Use the old API style
-            fields = QtCore.QStringList()
-            fields.append(comboMsg)
-            for field in fieldMap.values():
-                fields.append(field.name())
-        else:
-            # Use the new API style
-            fields = []
-            fields.append(comboMsg)
-            for i in range(fieldMap.count()):
-                name = fieldMap.at(i).name()
-                fields.append( name )
+        fieldNames.insert(0, comboMsg)
         self.ui.cmbXcoord.clear()
         self.ui.cmbYcoord.clear()
-        self.ui.cmbXcoord.addItems(fields)
-        self.ui.cmbYcoord.addItems(fields)
-        self.ui.groupxy.setTitle("Current layer: '"+layerName+"'")
+        self.ui.cmbXcoord.addItems(fieldNames)
+        self.ui.cmbYcoord.addItems(fieldNames)
+        self.ui.groupxy.setTitle("Current layer: '" + layerName + "'")
 
     def getXindex(self):
-        return self.ui.cmbXcoord.currentIndex()-1 # because first one is caption
+        # because first one is caption
+        return self.ui.cmbXcoord.currentIndex() - 1
 
     def getYindex(self):
-        return self.ui.cmbYcoord.currentIndex()-1 # because first one is caption
+        # because first one is caption
+        return self.ui.cmbYcoord.currentIndex() - 1

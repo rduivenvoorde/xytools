@@ -1,6 +1,6 @@
 <RCC>
   <qresource prefix="/plugins/xytools">
-    <file>help.png</file>
-    <file>icon.png</file>
+    <file>images/help.png</file>
+    <file>images/icon.png</file>
   </qresource>
 </RCC>

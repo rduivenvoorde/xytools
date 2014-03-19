@@ -29,7 +29,14 @@ from qgis.gui import *
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
-from xytoolsdialog import XyToolsDialog
+from dialogs.xy_fields import  XyFieldsDialog
+from dialogs.field_chooser import FieldChooserDialog
+# Import utils module
+import utils
+
+ICON = QIcon(":/plugins/xytools/images/icon.png")
+HELP = QIcon(":/plugins/xytools/images/help.png")
+
 
 class XyTools:
 
@@ -50,42 +57,42 @@ class XyTools:
         # in combination with the setCheckable it makes it will be unchecked automagically
         # 27dec2012 RD: to be honest, I'm not sure if we need this old stuff:
         if hasattr(self.iface, "actionCapturePoint"):
-            self.action = QAction(QIcon(":/plugins/xytools/icon.png"), \
+            self.action = QAction(ICON, \
                     "XY tools", self.iface.actionCapturePoint().actionGroup())
         else:
-            self.action = QAction(QIcon(":/plugins/xytools/icon.png"), \
+            self.action = QAction(ICON, \
                     "XY tools", self.iface.mainWindow())
         self.action.setCheckable(True)
         # connect the action to the run method
         QObject.connect(self.action, SIGNAL("triggered(bool)"), self.xyToolClick)
 
         # about
-        self.aboutAction = QAction(QIcon(":/plugins/xytools/help.png"), \
+        self.aboutAction = QAction(HELP, \
                               "About", self.iface.mainWindow())
         self.aboutAction.setWhatsThis("Xy Tools Plugin About")
         QObject.connect(self.aboutAction, SIGNAL("activated()"), self.about)
         # help
-        self.helpAction = QAction(QIcon(":/plugins/xytools/help.png"), \
+        self.helpAction = QAction(HELP, \
                               "Help", self.iface.mainWindow())
         self.helpAction.setWhatsThis("Xy Tools Plugin Help")
         QObject.connect(self.helpAction, SIGNAL("activated()"), self.help)
         # save as shape
-        self.shapeSaveAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
+        self.shapeSaveAction = QAction(ICON, \
                               "Save attribute table as Point shape file", self.iface.mainWindow())
         self.shapeSaveAction.setWhatsThis("Xy Tools Plugin Save attribute table as Shape file (using xy-Column values for geometries!)")
         QObject.connect(self.shapeSaveAction, SIGNAL("activated()"), self.shapeSave)
         # save as excel
-        self.excelSaveAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
+        self.excelSaveAction = QAction(ICON, \
                               "Save attribute table as Excel file", self.iface.mainWindow())
         self.excelSaveAction.setWhatsThis("Xy Tools Plugin Save Attribute Table as Excel File")
         QObject.connect(self.excelSaveAction, SIGNAL("activated()"), self.excelSave)
         # open excel file
-        self.excelOpenAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
+        self.excelOpenAction = QAction(ICON, \
                               "Open Excel file as attribute table or Point layer", self.iface.mainWindow())
         self.excelOpenAction.setWhatsThis("Xy Tools Plugin Open Excel file as Attribute table or Point layer")
         QObject.connect(self.excelOpenAction, SIGNAL("activated()"), self.excelOpen)
         # open open/libreoffice file
-        self.unoOpenAction = QAction(QIcon(":/plugins/xytools/icon.png"), \
+        self.unoOpenAction = QAction(ICON, \
                               "Open Libre/OpenOffice Calc file as attribute table or Point layer", self.iface.mainWindow())
         self.unoOpenAction.setWhatsThis("Xy Tools Plugin Open Libre/OpenOffice Calc file as Attribute table or Point layer")
         QObject.connect(self.unoOpenAction, SIGNAL("activated()"), self.unoOpen)
@@ -229,6 +236,19 @@ class XyTools:
         if self.layer == None: 
             QMessageBox.warning(self.iface.mainWindow(), "No active layer", "Please make an vector layer active before saving it to excel file.")
             return
+
+        fieldNames = utils.fieldNames(self.layer)
+        dlg = FieldChooserDialog(fieldNames)
+
+        names = []
+        while len(names) == 0:
+            dlg.show()
+            if dlg.exec_() == 0:
+                return
+            names = dlg.getSelectedFields()
+            if len(names) == 0:
+                QMessageBox.warning(self.iface.mainWindow(), "No fields selected", "Please select at least one field.")
+
         (filename, filter) = QFileDialog.getSaveFileNameAndFilter(self.iface.mainWindow(),
                     "Please save excel file as...",
                     ".",
@@ -254,38 +274,32 @@ class XyTools:
                 QMessageBox.No, QMessageBox.Yes) == QMessageBox.Yes:
                     selection = self.layer.selectedFeaturesIds()
         feature = QgsFeature();
-        rowNr = 0
+
+        xlw.writeAttributeRow(0, names)
+
+        rowNr = 1
         if QGis.QGIS_VERSION_INT < 10900:
             prov = self.layer.dataProvider()
             prov.select(prov.attributeIndexes())
             while prov.nextFeature(feature):
-                # attribute names
-                if rowNr == 0:
-                    values = []
-                    for (i, field) in prov.fields().iteritems():
-                        values.append(field.name().trimmed())
-                    xlw.writeAttributeRow( rowNr, values )
-                    rowNr+=1
-                # and attribute values, either for all or only for selection
+                # attribute values, either for all or only for selection
                 if selection == None or feature.id() in selection:
                     values = feature.attributeMap().values()
-                    xlw.writeAttributeRow( rowNr, values )
-                    rowNr+=1
+                    rowValues = []
+                    for field in names:
+                        rowValues.append(values[field])
+                    xlw.writeAttributeRow(rowNr, values)
+                    rowNr += 1
         else:
             prov = self.layer.getFeatures()
             while prov.nextFeature(feature):
-                # attribute names
-                if rowNr == 0:
-                    values = []
-                    for field in self.layer.dataProvider().fields():
-                        values.append(field.name().strip())
-                    xlw.writeAttributeRow( rowNr, values )
-                    rowNr+=1
-                # and attribute values, either for all or only for selection
+                # attribute values, either for all or only for selection
                 if selection == None or feature.id() in selection:
-                    values = feature.attributes()
-                    xlw.writeAttributeRow( rowNr, values )
-                    rowNr+=1
+                    values = []
+                    for field in names:
+                        values.append(feature.attribute(field))
+                    xlw.writeAttributeRow(rowNr, values)
+                    rowNr += 1
         xlw.saveFile()
         QMessageBox.information(self.iface.mainWindow(), "Success", "Successfully saved as xls file")
 
@@ -324,7 +338,8 @@ class XyTools:
 
 
     def getXyColumns(self, layer):
-        dlg = XyToolsDialog(self.XY_COMBO_MSG, layer.dataProvider().fields(), layer.name())
+        dlg = XyFieldsDialog(self.XY_COMBO_MSG, utils.fieldNames(layer),
+                            layer.name())
         xyOK = False
         while not xyOK:
             dlg.show()
