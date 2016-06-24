@@ -46,9 +46,9 @@ class Writer:
                     cell = unicode(cell.toString())
             # handle NULL values by writing 'NULL'
             if not cell:
-                cell = 'NULL'
+                cell = ''
             else:
-                cell = str(cell)
+                cell = unicode(cell)
                 try:
                     cell = float(cell)
                 except:
