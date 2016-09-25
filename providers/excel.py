@@ -48,7 +48,7 @@ class Writer:
             if not cell:
                 cell = 'NULL'
             else:
-                cell = str(cell)
+                cell = unicode(cell)
                 try:
                     cell = float(cell)
                 except:
