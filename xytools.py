@@ -50,6 +50,7 @@ class XyTools:
         # map with layer info
         self.layerInfo = {}
         self.layer = None
+        self.settings = QSettings()
 
 
     def initGui(self):
@@ -142,13 +143,15 @@ class XyTools:
 
 
     def excelOpen(self):
+        dirPath = self.settings.value("/xytools/excelOpenPath", ".", type=str)    
         (filename, filter) = QFileDialog.getOpenFileNameAndFilter(self.iface.mainWindow(),
                     "Please choose an Excel spreadsheet file to open...",
-                    ".",
+                    dirPath,
                     "Excel files (*.xls)",
                     "Filter list for selecting files from a dialog box")
         if len(filename)==0:
             return
+        self.settings.setValue("/xytools/excelOpenPath", QFileInfo(filename).absolutePath())   
         try:
             from providers import excel
         except:
@@ -160,13 +163,15 @@ class XyTools:
 
 
     def unoOpen(self):
+        dirPath = self.settings.value("/xytools/unoOpenPath", ".", type=str)    
         (filename, filter) = QFileDialog.getOpenFileNameAndFilter(self.iface.mainWindow(),
                     "Please choose an Libre/OpenOffice spreadsheet file to open...",
-                    ".",
+                    dirPath,
                     "Libre/OpenOffice OOcalc files (*.ods)",
                     "Filter list for selecting files from a dialog box")
         if len(filename)==0:
             return
+        self.settings.setValue("/xytools/unoOpenPath", QFileInfo(filename).absolutePath())   
         try:
             from providers import libreoffice
         except:
@@ -234,8 +239,11 @@ class XyTools:
 
     def excelSave(self):
         if self.layer == None: 
-            QMessageBox.warning(self.iface.mainWindow(), "No active layer", "Please make an vector layer active before saving it to excel file.")
-            return
+            if self.iface.activeLayer():
+                self.currentLayerChanged(self.iface.activeLayer())
+            else:   
+                QMessageBox.warning(self.iface.mainWindow(), "No active layer", "Please make an vector layer active before saving it to excel file.")
+                return
 
         fieldNames = utils.fieldNames(self.layer)
         dlg = FieldChooserDialog(fieldNames)
@@ -249,14 +257,16 @@ class XyTools:
             if len(names) == 0:
                 QMessageBox.warning(self.iface.mainWindow(), "No fields selected", "Please select at least one field.")
 
+        dirPath = self.settings.value("/xytools/excelSavePath", ".", type=str)    
         (filename, filter) = QFileDialog.getSaveFileNameAndFilter(self.iface.mainWindow(),
                     "Please save excel file as...",
-                    ".",
+                    dirPath,
                     "Excel files (*.xls)",
                     "Filter list for selecting files from a dialog box")
         fn, fileExtension = path.splitext(unicode(filename))
         if len(fn) == 0: # user choose cancel
             return
+        self.settings.setValue("/xytools/excelSavePath", QFileInfo(filename).absolutePath())
         if fileExtension != '.xls':
             filename = filename + '.xls'
         try:
@@ -305,14 +315,16 @@ class XyTools:
 
 
     def writeToShape(self):
+        dirPath = self.settings.value("/xytools/writeToShapePath", ".", type=str)    
         (filename, filter) = QFileDialog.getSaveFileNameAndFilter(self.iface.mainWindow(),
                     "Please save shape file as...",
-                    ".",
+                    dirPath,
                     "Esri shape files (*.shp)",
                     "Filter list for selecting files from a dialog box")
         # Check that a file was selected
         if len(filename) == 0: # user choose cancel
             return
+        self.settings.setValue("/xytools/writeToShapePath", QFileInfo(filename).absolutePath())
         fields = self.layer.dataProvider().fields()
         writer = QgsVectorFileWriter(unicode(filename), "UTF8", fields, QGis.WKBPoint, None)
         feature = QgsFeature();
