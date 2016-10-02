@@ -4,8 +4,8 @@
 # Tools for managing tabular data with x y columns
 #                             -------------------
 #        begin                : 2011-08-19
-#        copyright            : (C) 2011 by webmapper
-#        email                : richard@webmapper.net
+#        copyright            : (C) 2011 by Richard Duivenvoorde
+#        email                : richard@duif.net
 # ***************************************************************************/
 # 
 #/***************************************************************************

@@ -137,6 +137,10 @@ the underlying OGR-library.
 So: for a dbf you can add and remove records. But if you want further editing: like inserting records, adding columns etc,
 either use Libre/Open-office, or one of the other qgis table plugins.
 
+- 0.3.6   Bo Victor Thomsen and Germán Carrillo added some fixes: thanks!
+
+- 0.3.5   Victor Gonzalez added the possibility to choose which fields to export and added tests
+
 - 0.3.4   save as shapefile fix (thanks Victor Gonzalez)
 
 - 0.3.3   further fixing for 2.0 api changes

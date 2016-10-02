@@ -5,8 +5,8 @@
  Tools for managing tabular data with x y columns
                               -------------------
         begin                : 2011-08-19
-        copyright            : (C) 2011 by webmapper
-        email                : richard@webmapper.net
+        copyright            : (C) 2011 by Richard Duivenvoorde
+        email                : richard@duif.net
  ***************************************************************************/
 
 /***************************************************************************
@@ -462,7 +462,7 @@ class XyTools:
 
     def about(self):
         infoString =  u"Written by Richard Duivenvoorde\nEmail - richard@duif.net\n"
-        infoString += u"Company - http://www.webmapper.net\n"
+        infoString += u"Company - http://zuidt.nl\n"
         infoString += u"Source: https://github.com/rduivenvoorde/xytools"
         QMessageBox.information(self.iface.mainWindow(), \
                             u"XY tools Plugin About", infoString)
